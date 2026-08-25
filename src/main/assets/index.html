@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ラブカ デッキビルダー</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f5f5f5;
+  color: #222;
+}
+
+header {
+  background: #ff5b91;
+  color: white;
+  padding: 16px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+main {
+  padding: 12px;
+}
+
+.search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search input {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: #ff5b91;
+  color: white;
+  font-weight: bold;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.tabs button {
+  flex: 1;
+}
+
+.card {
+  background: white;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px #ddd;
+}
+
+.card-name {
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.card-number {
+  color: #777;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.card button {
+  margin-top: 10px;
+}
+
+#deck {
+  display: none;
+}
+
+.deck-count {
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+.deck-row {
+  background: white;
+  margin-bottom: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.deck-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.deck-buttons button {
+  padding: 7px 11px;
+}
+
+.empty {
+  text-align: center;
+  color: #777;
+  padding: 30px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>ラブカ デッキビルダー</h1>
+</header>
+
+<main>
+
+<div class="tabs">
+<button onclick="showCards()">カード検索</button>
+<button onclick="showDeck()">デッキ <span id="deckBadge">0</span></button>
+</div>
+
+<section id="cards">
+
+<div class="search">
+<input
+  id="search"
+  type="search"
+  placeholder="カード名・カード番号で検索"
+  oninput="renderCards()">
+</div>
+
+<div id="cardList"></div>
+
+</section>
+
+<section id="deck">
+
+<div class="deck-count">
+デッキ枚数：<span id="deckCount">0</span>枚
+</div>
+
+<div id="deckList"></div>
+
+<button onclick="clearDeck()">デッキを全削除</button>
+
+</section>
+
+</main>
+
+<script>
+const cards = [
+  {
+    id:"PL!N-bp1-001",
+    name:"高坂 穂乃果",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-002",
+    name:"絢瀬 絵里",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-003",
+    name:"南 ことり",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-004",
+    name:"園田 海未",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-005",
+    name:"星空 凛",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-006",
+    name:"西木野 真姫",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-007",
+    name:"東條 希",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-008",
+    name:"小泉 花陽",
+    group:"μ's"
+  },
+  {
+    id:"PL!N-bp1-009",
+    name:"矢澤 にこ",
+    group:"μ's"
+  }
+];
+
+let deck = JSON.parse(localStorage.getItem("lovecaDeck") || "{}");
+
+function renderCards() {
+  const word =
+    document.getElementById("search").value.toLowerCase();
+
+  const list = document.getElementById("cardList");
+
+  const filtered = cards.filter(card =>
+    card.name.toLowerCase().includes(word) ||
+    card.id.toLowerCase().includes(word) ||
+    card.group.toLowerCase().includes(word)
+  );
+
+  list.innerHTML = "";
+
+  filtered.forEach(card => {
+
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const count = deck[card.id] || 0;
+
+    div.innerHTML = `
+      <div class="card-name">${card.name}</div>
+      <div class="card-number">${card.id}</div>
+      <div class="card-number">${card.group}</div>
+      <button onclick="addCard('${card.id}')">
+        デッキに追加 ${count ? "(" + count + "枚)" : ""}
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+function addCard(id) {
+
+  const current = deck[id] || 0;
+
+  if (current >= 4) {
+    alert("同じカードは4枚までです");
+    return;
+  }
+
+  deck[id] = current + 1;
+
+  saveDeck();
+  renderCards();
+}
+
+function removeCard(id) {
+
+  if (!deck[id]) return;
+
+  deck[id]--;
+
+  if (deck[id] <= 0) {
+    delete deck[id];
+  }
+
+  saveDeck();
+  renderDeck();
+}
+
+function saveDeck() {
+  localStorage.setItem(
+    "lovecaDeck",
+    JSON.stringify(deck)
+  );
+
+  updateDeckCount();
+}
+
+function getTotal() {
+  return Object.values(deck)
+    .reduce((a,b) => a + b, 0);
+}
+
+function updateDeckCount() {
+
+  const total = getTotal();
+
+  document.getElementById("deckCount").textContent = total;
+  document.getElementById("deckBadge").textContent = total;
+}
+
+function renderDeck() {
+
+  const list = document.getElementById("deckList");
+
+  list.innerHTML = "";
+
+  const ids = Object.keys(deck);
+
+  if (!ids.length) {
+    list.innerHTML =
+      '<div class="empty">カードがまだありません</div>';
+    return;
+  }
+
+  ids.forEach(id => {
+
+    const card = cards.find(c => c.id === id);
+
+    if (!card) return;
+
+    const div = document.createElement("div");
+
+    div.className = "deck-row";
+
+    div.innerHTML = `
+      <div>
+        <strong>${card.name}</strong><br>
+        ${deck[id]}枚
+      </div>
+
+      <div class="deck-buttons">
+        <button onclick="addCard('${id}');renderDeck()">＋</button>
+        <button onclick="removeCard('${id}')">－</button>
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+}
+
+function clearDeck() {
+
+  if (!confirm("デッキをすべて削除しますか？")) {
+    return;
+  }
+
+  deck = {};
+
+  saveDeck();
+  renderDeck();
+  renderCards();
+}
+
+function showCards() {
+
+  document.getElementById("cards").style.display = "block";
+  document.getElementById("deck").style.display = "none";
+
+  renderCards();
+}
+
+function showDeck() {
+
+  document.getElementById("cards").style.display = "none";
+  document.getElementById("deck").style.display = "block";
+
+  renderDeck();
+}
+
+renderCards();
+updateDeckCount();
+</script>
+
+</body>
+</html>
