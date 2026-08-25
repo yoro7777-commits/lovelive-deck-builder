@@ -2,16 +2,13 @@
 
 import gzip
 import json
-import re
-import subprocess
-import tempfile
 import urllib.request
 from pathlib import Path
 
 ASSETS = Path("src/main/assets")
 ASSETS.mkdir(parents=True, exist_ok=True)
 
-UA = "TCG-Deck-Studio-CardDataBuilder/2.0"
+UA = "TCG-Deck-Studio-CardDataBuilder/3.0"
 
 
 def download(url, timeout=120):
@@ -19,7 +16,10 @@ def download(url, timeout=120):
         url,
         headers={"User-Agent": UA}
     )
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with urllib.request.urlopen(
+        req,
+        timeout=timeout
+    ) as r:
         return r.read()
 
 
@@ -29,7 +29,9 @@ def get_json(url, gz=False):
     if gz or url.endswith(".gz"):
         raw = gzip.decompress(raw)
 
-    return json.loads(raw.decode("utf-8-sig"))
+    return json.loads(
+        raw.decode("utf-8-sig")
+    )
 
 
 def safe(v):
@@ -38,7 +40,9 @@ def safe(v):
 
     if isinstance(v, (list, tuple)):
         return " / ".join(
-            str(x) for x in v if x is not None
+            str(x)
+            for x in v
+            if x is not None
         )
 
     return str(v)
@@ -48,17 +52,25 @@ def write_js(game, cards):
     unique = {}
 
     for c in cards:
-        cid = safe(c.get("id")).strip()
-        name = safe(c.get("name")).strip()
+        cid = safe(
+            c.get("id")
+        ).strip()
+
+        name = safe(
+            c.get("name")
+        ).strip()
 
         if not cid or not name:
             continue
 
         c["id"] = cid
         c["name"] = name
+
         unique[cid] = c
 
-    out = list(unique.values())
+    out = list(
+        unique.values()
+    )
 
     if not out:
         raise RuntimeError(
@@ -74,26 +86,46 @@ def write_js(game, cards):
     js = (
         "window.TCG_CARD_DATA="
         "window.TCG_CARD_DATA||{};\n"
-        f"window.TCG_CARD_DATA.{game}={payload};\n"
+        f"window.TCG_CARD_DATA.{game}="
+        f"{payload};\n"
     )
 
-    path = ASSETS / f"cards_{game}.js"
+    path = (
+        ASSETS
+        / f"cards_{game}.js"
+    )
 
     path.write_text(
         js,
         encoding="utf-8"
     )
 
-    print(
-        f"{game}: {len(out)} cards -> {path}"
+    image_count = sum(
+        1
+        for c in out
+        if c.get("image")
     )
 
-    return len(out)
+    print(
+        f"{game}: "
+        f"{len(out)} cards / "
+        f"{image_count} images"
+    )
+
+    return {
+        "cards": len(out),
+        "images": image_count
+    }
 
 
 # =========================
 # ラブカ
 # =========================
+
+LOVECA_COMMIT = (
+    "efe152f90bde74fbf002e62956e036dd102655a2"
+)
+
 
 def loveca_image_url(x):
     image = safe(
@@ -106,44 +138,41 @@ def loveca_image_url(x):
     if not image:
         return ""
 
-    if image.startswith("http://") or image.startswith("https://"):
+    if (
+        image.startswith("https://")
+        or image.startswith("http://")
+    ):
         return image
 
-    if image.startswith("/"):
-        return (
-            "https://raw.githubusercontent.com/"
-            "wlt233/llocg_db/"
-            "efe152f90bde74fbf002e62956e036dd102655a2"
-            + image
-        )
+    image = image.lstrip("./")
 
     return (
         "https://raw.githubusercontent.com/"
         "wlt233/llocg_db/"
-        "efe152f90bde74fbf002e62956e036dd102655a2/"
-        + image.lstrip("./")
+        f"{LOVECA_COMMIT}/"
+        f"{image}"
     )
 
 
 def build_loveca():
-    # 最新版 cards.json が空になっているため、
-    # データが存在していた直前のコミットを固定利用
     url = (
         "https://raw.githubusercontent.com/"
         "wlt233/llocg_db/"
-        "efe152f90bde74fbf002e62956e036dd102655a2/"
+        f"{LOVECA_COMMIT}/"
         "json/cards.json"
     )
 
     data = get_json(url)
 
     if isinstance(data, dict):
-        rows = list(data.values())
+        rows = list(
+            data.values()
+        )
     elif isinstance(data, list):
         rows = data
     else:
         raise RuntimeError(
-            "LoveCa JSON format is invalid"
+            "LoveCa JSON format invalid"
         )
 
     cards = []
@@ -166,46 +195,48 @@ def build_loveca():
         ).strip()
 
         if not name:
-            name = "エネルギー " + cid
-
-        typ = safe(
-            x.get("type")
-            or x.get("card_type")
-        )
-
-        series = safe(
-            x.get("series")
-            or x.get("group")
-            or x.get("title")
-        )
-
-        product = safe(
-            x.get("product")
-            or x.get("pack")
-            or x.get("set")
-        )
-
-        rarity = safe(
-            x.get("rare")
-            or x.get("rarity")
-        )
-
-        image = loveca_image_url(x)
+            name = (
+                "エネルギー "
+                + cid
+            )
 
         cards.append({
             "id": cid,
             "name": name,
-            "type": typ,
-            "series": series,
-            "product": product,
-            "rarity": rarity,
-            "image": image,
-            "color": safe(x.get("color")),
+
+            "type": safe(
+                x.get("type")
+                or x.get("card_type")
+            ),
+
+            "series": safe(
+                x.get("series")
+                or x.get("group")
+                or x.get("title")
+            ),
+
+            "product": safe(
+                x.get("product")
+                or x.get("pack")
+                or x.get("set")
+            ),
+
+            "rarity": safe(
+                x.get("rare")
+                or x.get("rarity")
+            ),
+
+            "image":
+                loveca_image_url(x),
+
+            "color":
+                safe(x.get("color")),
         })
 
     if len(cards) < 100:
         raise RuntimeError(
-            f"LoveCa data too small: {len(cards)}"
+            f"LoveCa data too small: "
+            f"{len(cards)}"
         )
 
     return cards
@@ -215,148 +246,85 @@ def build_loveca():
 # ポケカ
 # =========================
 
-def pokemon_yaml_image(path):
-    try:
-        text = path.read_text(
-            encoding="utf-8"
-        )
-    except Exception:
-        return ""
-
-    m = re.search(
-        r"^\s*image_url:\s*(.+?)\s*$",
-        text,
-        re.MULTILINE
-    )
-
-    if not m:
-        return ""
-
-    value = m.group(1).strip()
-
-    if (
-        len(value) >= 2
-        and value[0] == value[-1]
-        and value[0] in "\"'"
-    ):
-        value = value[1:-1]
-
-    if value.lower() in (
-        "null",
-        "none",
-        "~"
-    ):
-        return ""
-
-    return value
-
-
-def clone_pokemon_data():
-    temp = Path(
-        tempfile.mkdtemp(
-            prefix="pokemon-card-data-"
-        )
-    )
-
-    repo = temp / "repo"
-
-    subprocess.run(
-        [
-            "git",
-            "clone",
-            "--depth",
-            "1",
-            "--quiet",
-            "https://github.com/"
-            "1ulce/pokemon-card-data.git",
-            str(repo),
-        ],
-        check=True
-    )
-
-    return repo
-
-
 def build_pokemon():
-    index = get_json(
-        "https://raw.githubusercontent.com/"
-        "1ulce/pokemon-card-data/main/"
-        "index/all.json"
+    """
+    TCGdex 日本語カード一覧を利用。
+
+    例:
+    image =
+    https://assets.tcgdex.net/ja/...
+    
+    ↓
+    https://assets.tcgdex.net/ja/.../low.webp
+    """
+
+    url = (
+        "https://api.tcgdex.net/"
+        "v2/ja/cards"
     )
 
-    rows = (
-        index.get("faces", [])
-        if isinstance(index, dict)
-        else index
-    )
+    rows = get_json(url)
 
-    repo = clone_pokemon_data()
+    if not isinstance(rows, list):
+        raise RuntimeError(
+            "Pokemon TCGdex response invalid"
+        )
 
     cards = []
 
-    for i, x in enumerate(rows or []):
+    for i, x in enumerate(rows):
         if not isinstance(x, dict):
             continue
 
-        slug = safe(
-            x.get("slug")
-            or f"pokemon-{i+1}"
-        )
+        cid = safe(
+            x.get("id")
+            or f"PK-{i+1}"
+        ).strip()
 
-        typ = safe(
-            x.get("card_type")
-        )
+        name = safe(
+            x.get("name")
+            or cid
+        ).strip()
 
-        typ = {
-            "Pokémon": "ポケモン",
-            "Pokemon": "ポケモン",
-            "Trainer": "トレーナーズ",
-            "Energy": "エネルギー",
-        }.get(
-            typ,
-            typ
-        )
-
-        yaml_path = (
-            repo
-            / "cards"
-            / f"{slug}.yml"
-        )
+        image_base = safe(
+            x.get("image")
+        ).strip()
 
         image = ""
 
-        if yaml_path.exists():
-            image = pokemon_yaml_image(
-                yaml_path
+        if image_base:
+            image = (
+                image_base.rstrip("/")
+                + "/low.webp"
             )
 
         cards.append({
-            "id": slug,
-            "name": safe(
-                x.get("name_ja")
-                or x.get("name_en")
-                or slug
-            ),
-            "type": typ,
-            "series": safe(
-                x.get("first_set")
-            ),
-            "product": safe(
-                x.get("first_set")
-            ),
+            "id": cid,
+
+            "name": name,
+
+            "type":
+                "ポケモンカード",
+
+            "series": "",
+
+            "product": "",
+
             "rarity": "",
-            "regulation": safe(
-                x.get("regulation_mark")
-            ),
+
+            "regulation": "",
+
             "image": image,
-            "name_en": safe(
-                x.get("name_en")
+
+            "localId": safe(
+                x.get("localId")
             ),
         })
 
     if len(cards) < 500:
         raise RuntimeError(
-            f"Pokemon data too small: {len(cards)}"
+            f"Pokemon data too small: "
+            f"{len(cards)}"
         )
 
     return cards
@@ -436,11 +404,45 @@ def recursive_products(
     return out
 
 
+def union_image_url(x):
+    """
+    まず元データに画像URLがあれば使う。
+    なければ productId から
+    TCGplayer CDN URLを生成。
+    """
+
+    direct = safe(
+        x.get("imageUrl")
+        or x.get("image_url")
+        or x.get("image")
+        or x.get("imageURL")
+    ).strip()
+
+    if direct.startswith(
+        "https://"
+    ):
+        return direct
+
+    product_id = safe(
+        x.get("productId")
+        or x.get("product_id")
+    ).strip()
+
+    if product_id.isdigit():
+        return (
+            "https://tcgplayer-cdn."
+            "tcgplayer.com/product/"
+            f"{product_id}_in_1000x1000.jpg"
+        )
+
+    return ""
+
+
 def build_union():
     url = (
         "https://github.com/"
-        "HanClinto/tcgjson/releases/"
-        "latest/download/"
+        "HanClinto/tcgjson/"
+        "releases/latest/download/"
         "union-arena.json.gz"
     )
 
@@ -479,27 +481,21 @@ def build_union():
         if not name:
             continue
 
+        product_id = safe(
+            x.get("productId")
+            or x.get("product_id")
+        ).strip()
+
         cid = safe(
             x.get("number")
             or x.get("cardNumber")
             or x.get("card_number")
             or x.get("collectorNumber")
             or x.get("collector_number")
-            or x.get("productId")
-            or x.get("product_id")
+            or product_id
             or x.get("id")
             or f"UA-{i+1}"
         ).strip()
-
-        typ = safe(
-            x.get("cardType")
-            or x.get("card_type")
-            or x.get("type")
-        )
-
-        rarity = safe(
-            x.get("rarity")
-        )
 
         set_name = safe(
             x.get("_set_name")
@@ -507,22 +503,30 @@ def build_union():
             or x.get("set_name")
         )
 
-        image = safe(
-            x.get("imageUrl")
-            or x.get("image_url")
-            or x.get("image")
-            or x.get("imageURL")
-            or x.get("images")
-        )
-
         cards.append({
             "id": cid,
+
             "name": name,
-            "type": typ or "カード",
+
+            "type": safe(
+                x.get("cardType")
+                or x.get("card_type")
+                or x.get("type")
+            ) or "カード",
+
             "series": set_name,
+
             "product": set_name,
-            "rarity": rarity,
-            "image": image,
+
+            "rarity": safe(
+                x.get("rarity")
+            ),
+
+            "image":
+                union_image_url(x),
+
+            "productId":
+                product_id,
         })
 
     if len(cards) < 100:
@@ -539,7 +543,7 @@ def build_union():
 # =========================
 
 def main():
-    counts = {}
+    info = {}
 
     builders = {
         "loveca": build_loveca,
@@ -547,28 +551,28 @@ def main():
         "union": build_union,
     }
 
-    for game, fn in builders.items():
+    for game, builder in builders.items():
         print(
             f"Building {game}..."
         )
 
-        cards = fn()
+        cards = builder()
 
-        counts[game] = write_js(
+        info[game] = write_js(
             game,
             cards
         )
 
-    info = (
+    build_info = (
         ASSETS
         / "card_data_build_info.json"
     )
 
-    info.write_text(
+    build_info.write_text(
         json.dumps(
             {
-                "counts": counts,
-                "version": 2
+                "version": 3,
+                "data": info
             },
             ensure_ascii=False,
             indent=2
@@ -577,8 +581,15 @@ def main():
     )
 
     print(
-        "Card data build complete:",
-        counts
+        "Card data build complete"
+    )
+
+    print(
+        json.dumps(
+            info,
+            ensure_ascii=False,
+            indent=2
+        )
     )
 
 
