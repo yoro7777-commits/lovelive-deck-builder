@@ -1,377 +1,1063 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ラブカ デッキビルダー</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TCG Deck Studio</title>
 <style>
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: #f5f5f5;
-  color: #222;
+:root{
+  --bg:#f7f8fa;
+  --surface:#ffffff;
+  --text:#202124;
+  --muted:#767b84;
+  --line:#e7e9ed;
+  --accent:#ff4f87;
+  --soft:#fff1f6;
+  --input:#ffffff;
+  --shadow:#0000000b;
+}
+html[data-theme="dark"]{
+  --bg:#101216;
+  --surface:#191c22;
+  --text:#f4f5f7;
+  --muted:#a4a9b3;
+  --line:#2b3038;
+  --soft:#2a1821;
+  --input:#14171c;
+  --shadow:#00000055;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+body{padding-bottom:84px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+
+.top{
+  position:sticky;
+  top:0;
+  z-index:30;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+  padding:12px 16px;
+}
+.toprow{display:flex;align-items:center;gap:12px}
+.appicon{
+  width:44px;
+  height:44px;
+  border-radius:13px;
+  background:linear-gradient(135deg,#7a65ff,#ff4f87);
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-weight:900;
+}
+.apptitle{font-size:20px;font-weight:900;line-height:1.15}
+.subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+
+main{padding:14px;max-width:980px;margin:auto}
+.panel{
+  background:var(--surface);
+  border-radius:20px;
+  padding:15px;
+  box-shadow:0 3px 18px var(--shadow);
+  margin-bottom:13px;
+}
+.hero{padding:18px}
+.hero h2{font-size:26px;margin:0 0 6px}
+.hero p{margin:0;color:var(--muted);line-height:1.55}
+
+.gamegrid{display:grid;gap:11px;margin-top:16px}
+.gamecard{
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:var(--surface);
+}
+.gamecard.active{
+  outline:3px solid color-mix(in srgb,var(--accent) 18%,transparent);
+  border-color:color-mix(in srgb,var(--accent) 35%,var(--line));
+}
+.gamebadge{
+  width:56px;
+  height:56px;
+  border-radius:16px;
+  color:#fff;
+  font-weight:900;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  line-height:1.05;
+}
+.g-love{background:linear-gradient(135deg,#ff4f87,#ff8fb4)}
+.g-poke{background:linear-gradient(135deg,#2f66c4,#f2c300)}
+.g-union{background:linear-gradient(135deg,#151515,#d42d37)}
+
+.gameinfo{min-width:0;flex:1}
+.gameinfo b{font-size:17px}
+.gameinfo small{display:block;color:var(--muted);margin-top:3px;line-height:1.4}
+.select{
+  border:0;
+  border-radius:11px;
+  padding:10px 12px;
+  background:#eef1f5;
+  font-weight:800;
+}
+.active .select{background:var(--accent);color:#fff}
+
+.quick{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.stat{
+  background:var(--surface);
+  border-radius:16px;
+  padding:12px;
+  text-align:center;
+  box-shadow:0 2px 10px var(--shadow);
+}
+.stat b{font-size:21px;display:block}
+.stat small{color:var(--muted);font-size:11px}
+
+.sectiontitle{font-size:16px;font-weight:900;margin:16px 2px 9px}
+.searchbox{
+  width:100%;
+  padding:14px;
+  border:1px solid #d7dbe1;
+  border-radius:13px;
+  background:var(--input);
+  color:var(--text);
+  font-size:16px;
+}
+.filters{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:9px;
+}
+.filters select{
+  padding:11px;
+  border:1px solid #d7dbe1;
+  border-radius:11px;
+  background:var(--input);
+  color:var(--text);
+  min-width:0;
 }
 
-header {
-  background: #ff5b91;
-  color: white;
-  padding: 16px;
-  text-align: center;
+.cardgrid{display:grid;gap:10px}
+.card{
+  background:var(--surface);
+  border-radius:17px;
+  padding:12px;
+  display:flex;
+  gap:12px;
+  box-shadow:0 2px 12px var(--shadow);
+}
+.thumb{
+  width:76px;
+  min-width:76px;
+  aspect-ratio:5/7;
+  border-radius:9px;
+  background:#eef0f3;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  color:#9096a0;
+  font-size:11px;
+  text-align:center;
+}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.cardbody{flex:1;min-width:0}
+.name{font-weight:900;font-size:17px;line-height:1.3}
+.meta{font-size:12px;color:var(--muted);margin-top:4px;word-break:break-all}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.tag{font-size:11px;padding:3px 7px;border-radius:999px;background:#f0f2f5;color:#202124}
+.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+
+.btn{
+  border:0;
+  border-radius:11px;
+  padding:10px 12px;
+  font-weight:800;
+  background:#eef1f5;
+  color:#202124;
+}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.danger{background:#fff0f1;color:#b92833}
+.btn.full{width:100%}
+
+.deckrow{
+  background:var(--surface);
+  border-radius:15px;
+  padding:12px;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  box-shadow:0 1px 8px var(--shadow);
+}
+.qty{display:flex;align-items:center;gap:7px}
+.qty button{
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:9px;
+  background:var(--accent);
+  color:#fff;
+  font-size:20px;
+}
+.qty b{min-width:20px;text-align:center}
+
+.rules{display:grid;gap:7px}
+.rule{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+.rule:last-child{border-bottom:0}
+.ok{color:#18864b;font-weight:900}
+.warn{color:#b87900;font-weight:900}
+.bad{color:#c8343d;font-weight:900}
+
+.deckslots{display:grid;gap:8px}
+.slot{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:10px;
+}
+.slot input{
+  flex:1;
+  border:0;
+  outline:0;
+  font-weight:800;
+  background:transparent;
+  color:var(--text);
+}
+.slot.active{
+  border-color:var(--accent);
+  background:var(--soft);
 }
 
-header h1 {
-  margin: 0;
-  font-size: 22px;
+textarea{
+  width:100%;
+  min-height:170px;
+  padding:11px;
+  border:1px solid #d7dbe1;
+  border-radius:12px;
+  background:var(--input);
+  color:var(--text);
+  font-family:monospace;
+  font-size:12px;
+}
+.note{font-size:12px;color:var(--muted);line-height:1.55}
+.empty{
+  background:var(--surface);
+  border-radius:17px;
+  padding:30px;
+  text-align:center;
+  color:var(--muted);
 }
 
-main {
-  padding: 12px;
+.bottom{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:40;
+  background:var(--surface);
+  border-top:1px solid var(--line);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  padding-bottom:env(safe-area-inset-bottom);
 }
-
-.search {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+.bottom button{
+  border:0;
+  background:var(--surface);
+  color:#70757d;
+  padding:9px 2px 8px;
+  font-size:10px;
 }
-
-.search input {
-  flex: 1;
-  padding: 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.bottom button .ico{
+  display:block;
+  font-size:22px;
+  line-height:1.1;
+  margin-bottom:3px;
 }
+.bottom button.active{color:var(--accent);font-weight:900}
+.hidden{display:none!important}
 
-button {
-  border: 0;
-  border-radius: 8px;
-  padding: 10px 14px;
-  background: #ff5b91;
-  color: white;
-  font-weight: bold;
-}
-
-.tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
-}
-
-.tabs button {
-  flex: 1;
-}
-
-.card {
-  background: white;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px #ddd;
-}
-
-.card-name {
-  font-weight: bold;
-  font-size: 17px;
-}
-
-.card-number {
-  color: #777;
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.card button {
-  margin-top: 10px;
-}
-
-#deck {
-  display: none;
-}
-
-.deck-count {
-  background: white;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  font-weight: bold;
-}
-
-.deck-row {
-  background: white;
-  margin-bottom: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.deck-buttons {
-  display: flex;
-  gap: 5px;
-}
-
-.deck-buttons button {
-  padding: 7px 11px;
-}
-
-.empty {
-  text-align: center;
-  color: #777;
-  padding: 30px;
+@media(min-width:720px){
+  .gamegrid{grid-template-columns:repeat(3,1fr)}
+  .cardgrid{grid-template-columns:1fr 1fr}
+  .quick{max-width:560px}
+  .filters{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
-
 <body>
 
-<header>
-<h1>ラブカ デッキビルダー</h1>
+<header class="top">
+  <div class="toprow">
+    <div class="appicon">TCG</div>
+    <div>
+      <div class="apptitle">TCG Deck Studio</div>
+      <div class="subtitle" id="gameLabel">ラブカ・ポケカ・ユニアリ対応</div>
+    </div>
+  </div>
 </header>
 
 <main>
 
-<div class="tabs">
-<button onclick="showCards()">カード検索</button>
-<button onclick="showDeck()">デッキ <span id="deckBadge">0</span></button>
-</div>
+<section id="homeView">
+  <div class="panel hero">
+    <h2>デッキを、ひとつのアプリで。</h2>
+    <p>ラブカ・ポケカ・ユニアリを切り替えて、カード検索・デッキ作成・保存・データ取り込みができます。</p>
+    <div id="gameChooser" class="gamegrid"></div>
+  </div>
 
-<section id="cards">
+  <div class="quick">
+    <div class="stat"><b id="homeCards">0</b><small>登録カード</small></div>
+    <div class="stat"><b id="homeDeck">0</b><small>現在デッキ</small></div>
+    <div class="stat"><b id="homeSlots">0/5</b><small>保存スロット</small></div>
+  </div>
 
-<div class="search">
-<input
-  id="search"
-  type="search"
-  placeholder="カード名・カード番号で検索"
-  oninput="renderCards()">
-</div>
-
-<div id="cardList"></div>
-
+  <div class="sectiontitle">すぐに始める</div>
+  <div class="panel">
+    <button class="btn primary full" onclick="showView('search')">カードを検索してデッキを作る</button>
+  </div>
 </section>
 
-<section id="deck">
+<section id="searchView" class="hidden">
+  <div class="panel">
+    <input id="searchBox" class="searchbox" type="search" placeholder="カード名・カード番号で検索" oninput="renderCards()">
+    <div class="filters">
+      <select id="typeFilter" onchange="renderCards()"><option value="">全タイプ</option></select>
+      <select id="seriesFilter" onchange="renderCards()"><option value="">全シリーズ</option></select>
+      <select id="rarityFilter" onchange="renderCards()"><option value="">全レアリティ</option></select>
+    </div>
+  </div>
 
-<div class="deck-count">
-デッキ枚数：<span id="deckCount">0</span>枚
-</div>
+  <div class="quick">
+    <div class="stat"><b id="dbCount">0</b><small>カードDB</small></div>
+    <div class="stat"><b id="hitCount">0</b><small>検索結果</small></div>
+    <div class="stat"><b id="deckBadge">0</b><small>デッキ枚数</small></div>
+  </div>
 
-<div id="deckList"></div>
+  <div class="sectiontitle">カード一覧</div>
+  <div id="cardList" class="cardgrid"></div>
+</section>
 
-<button onclick="clearDeck()">デッキを全削除</button>
+<section id="deckView" class="hidden">
+  <div class="panel">
+    <input id="deckName" class="searchbox" placeholder="デッキ名" oninput="renameCurrentDeck()">
+  </div>
 
+  <div id="rulePanel" class="panel rules"></div>
+
+  <div class="sectiontitle">デッキ内容</div>
+  <div id="deckList"></div>
+
+  <div class="panel">
+    <button class="btn primary" onclick="exportDeck()">レシピを書き出す</button>
+    <button class="btn" onclick="copyDeck()">コピー</button>
+    <button class="btn danger" onclick="clearDeck()">全削除</button>
+    <textarea id="deckText" style="margin-top:10px" placeholder="デッキレシピ"></textarea>
+  </div>
+</section>
+
+<section id="savedView" class="hidden">
+  <div class="panel">
+    <b>保存デッキ</b>
+    <p class="note">各TCGにつき最大5スロット。スロットを切り替えると、そのデッキが編集対象になります。</p>
+    <div id="slotList" class="deckslots"></div>
+    <button class="btn primary full" style="margin-top:10px" onclick="newDeckSlot()">空きスロットに新規デッキ</button>
+  </div>
+</section>
+
+<section id="settingsView" class="hidden">
+  <div class="panel">
+    <b>カードデータ管理</b>
+    <p class="note">現在選択中のTCGへJSON配列を取り込みます。</p>
+    <textarea id="importArea" placeholder='[{"id":"xxx","name":"カード名","type":"ポケモン","series":"商品名","rarity":"R","image":"https://..."}]'></textarea>
+    <div style="margin-top:9px">
+      <button class="btn primary" onclick="importCards()">取り込む</button>
+      <button class="btn" onclick="exportCards()">DBを書き出す</button>
+      <button class="btn danger" onclick="resetCards()">初期DBに戻す</button>
+    </div>
+    <div id="importStatus" class="note" style="margin-top:10px"></div>
+  </div>
+
+  <div class="panel">
+    <b>表示設定</b>
+    <p class="note">ライト / ダーク / 端末設定に合わせる、から選べます。</p>
+    <div class="filters" style="grid-template-columns:1fr">
+      <select id="themeSelect" onchange="setTheme(this.value)">
+        <option value="system">端末設定に合わせる</option>
+        <option value="light">ライトモード</option>
+        <option value="dark">ダークモード</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="panel">
+    <b>ルールチェック</b>
+    <p class="note" id="ruleNote"></p>
+  </div>
 </section>
 
 </main>
 
+<nav class="bottom">
+  <button id="navHome" class="active" onclick="showView('home')"><span class="ico">⌂</span>ホーム</button>
+  <button id="navSearch" onclick="showView('search')"><span class="ico">⌕</span>カード検索</button>
+  <button id="navDeck" onclick="showView('deck')"><span class="ico">▣</span>デッキ</button>
+  <button id="navSaved" onclick="showView('saved')"><span class="ico">▤</span>保存</button>
+  <button id="navSettings" onclick="showView('settings')"><span class="ico">⚙</span>設定</button>
+</nav>
+
 <script>
-const cards = [
-  {
-    id:"PL!N-bp1-001",
-    name:"高坂 穂乃果",
-    group:"μ's"
+const GAME={
+  loveca:{
+    name:'ラブカ',
+    full:'ラブライブ！オフィシャルカードゲーム',
+    accent:'#ff4f87',
+    badge:'g-love',
+    short:'ラブ\\nカ',
+    rules:'メイン60枚（メンバー48＋ライブ12）＋エネルギー12枚を目安にチェック'
   },
-  {
-    id:"PL!N-bp1-002",
-    name:"絢瀬 絵里",
-    group:"μ's"
+  pokemon:{
+    name:'ポケカ',
+    full:'ポケモンカードゲーム',
+    accent:'#2f66c4',
+    badge:'g-poke',
+    short:'ポケ\\nカ',
+    rules:'60枚デッキ。同じ名前のカードは原則4枚までとしてチェック'
   },
-  {
-    id:"PL!N-bp1-003",
-    name:"南 ことり",
-    group:"μ's"
-  },
-  {
-    id:"PL!N-bp1-004",
-    name:"園田 海未",
-    group:"μ's"
-  },
-  {
-    id:"PL!N-bp1-005",
-    name:"星空 凛",
-    group:"μ's"
-  },
-  {
-    id:"PL!N-bp1-006",
-    name:"西木野 真姫",
-    group:"μ's"
-  },
-  {
-    id:"PL!N-bp1-007",
-    name:"東條 希",
-    group:"μ's"
-  },
-  {
-    id:"PL!N-bp1-008",
-    name:"小泉 花陽",
-    group:"μ's"
-  },
-  {
-    id:"PL!N-bp1-009",
-    name:"矢澤 にこ",
-    group:"μ's"
+  union:{
+    name:'ユニアリ',
+    full:'UNION ARENA',
+    accent:'#111111',
+    badge:'g-union',
+    short:'UA',
+    rules:'50枚デッキ。同じカードナンバーは4枚まで'
   }
-];
+};
 
-let deck = JSON.parse(localStorage.getItem("lovecaDeck") || "{}");
+const SEED={
+  loveca:[
+    {id:'PL!-bp5-001-R+',name:'高坂穂乃果',type:'メンバー',series:'ラブライブ！',rarity:'R+'},
+    {id:'PL!N-bp1-001-R',name:'上原歩夢',type:'メンバー',series:'虹ヶ咲',rarity:'R'},
+    {id:'PL!SP-bp7-001-R',name:'澁谷かのん',type:'メンバー',series:'スーパースター!!',rarity:'R'},
+    {id:'PL!HS-bp2-019-L',name:'Bloom the smile, Bloom the dream!',type:'ライブ',series:'蓮ノ空',rarity:'L'},
+    {id:'PL!-bp1-000-LLE',name:'高坂穂乃果',type:'エネルギー',series:'ラブライブ！',rarity:'LLE'}
+  ],
+  pokemon:[
+    {id:'SV-SAMPLE-001',name:'ピカチュウ',type:'ポケモン',series:'サンプル',rarity:'C'},
+    {id:'SV-SAMPLE-002',name:'博士の研究',type:'サポート',series:'サンプル',rarity:'U'},
+    {id:'SV-SAMPLE-003',name:'ハイパーボール',type:'グッズ',series:'サンプル',rarity:'U'},
+    {id:'SV-SAMPLE-004',name:'基本雷エネルギー',type:'基本エネルギー',series:'サンプル',rarity:'-'}
+  ],
+  union:[
+    {id:'UA-SAMPLE-001',name:'サンプルキャラクター',type:'キャラクター',series:'サンプル作品',rarity:'R',title:'SAMPLE'},
+    {id:'UA-SAMPLE-002',name:'サンプルイベント',type:'イベント',series:'サンプル作品',rarity:'U',title:'SAMPLE'},
+    {id:'UA-SAMPLE-003',name:'サンプルフィールド',type:'フィールド',series:'サンプル作品',rarity:'C',title:'SAMPLE'}
+  ]
+};
 
-function renderCards() {
-  const word =
-    document.getElementById("search").value.toLowerCase();
+const clone=x=>JSON.parse(JSON.stringify(x));
 
-  const list = document.getElementById("cardList");
+let currentGame=localStorage.getItem('tdsGame')||'loveca';
+let db=load('tdsDb',SEED);
+let state=load('tdsDeckState',{
+  loveca:{active:0,slots:[]},
+  pokemon:{active:0,slots:[]},
+  union:{active:0,slots:[]}
+});
 
-  const filtered = cards.filter(card =>
-    card.name.toLowerCase().includes(word) ||
-    card.id.toLowerCase().includes(word) ||
-    card.group.toLowerCase().includes(word)
-  );
+for(const g of Object.keys(GAME)){
+  if(!state[g])state[g]={active:0,slots:[]};
+  if(!state[g].slots.length)state[g].slots=[makeSlot(GAME[g].name+'デッキ')];
+}
 
-  list.innerHTML = "";
+function makeSlot(name){
+  return{name,created:Date.now(),cards:{}};
+}
 
-  filtered.forEach(card => {
+function load(k,f){
+  try{
+    const v=localStorage.getItem(k);
+    return v?JSON.parse(v):clone(f);
+  }catch(e){
+    return clone(f);
+  }
+}
 
-    const div = document.createElement("div");
-    div.className = "card";
+function persist(){
+  localStorage.setItem('tdsGame',currentGame);
+  localStorage.setItem('tdsDb',JSON.stringify(db));
+  localStorage.setItem('tdsDeckState',JSON.stringify(state));
+  updateTop();
+}
 
-    const count = deck[card.id] || 0;
+function deck(){
+  const s=state[currentGame];
+  if(!s.slots[s.active]){
+    s.slots[s.active]=makeSlot(GAME[currentGame].name+'デッキ');
+  }
+  return s.slots[s.active];
+}
 
-    div.innerHTML = `
-      <div class="card-name">${card.name}</div>
-      <div class="card-number">${card.id}</div>
-      <div class="card-number">${card.group}</div>
-      <button onclick="addCard('${card.id}')">
-        デッキに追加 ${count ? "(" + count + "枚)" : ""}
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
+}
+
+function js(s){
+  return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+
+function chooseGame(g){
+  currentGame=g;
+  document.documentElement.style.setProperty('--accent',GAME[g].accent);
+  persist();
+  renderChooser();
+  buildFilters();
+  renderCards();
+  renderDeck();
+  renderSlots();
+  updateTop();
+}
+
+function renderChooser(){
+  document.getElementById('gameChooser').innerHTML=
+  Object.entries(GAME).map(([k,v])=>`
+    <div class="gamecard ${k===currentGame?'active':''}">
+      <div class="gamebadge ${v.badge}">${v.short.replace('\\n','<br>')}</div>
+      <div class="gameinfo">
+        <b>${v.name}</b>
+        <small>${v.full}<br>${v.rules}</small>
+      </div>
+      <button class="select" onclick="chooseGame('${k}')">
+        ${k===currentGame?'選択中':'選ぶ'}
       </button>
-    `;
-
-    list.appendChild(div);
-  });
+    </div>
+  `).join('');
 }
 
-function addCard(id) {
-
-  const current = deck[id] || 0;
-
-  if (current >= 4) {
-    alert("同じカードは4枚までです");
-    return;
+function showView(v){
+  for(const x of ['home','search','deck','saved','settings']){
+    document.getElementById(x+'View').classList.toggle('hidden',x!==v);
+    document.getElementById('nav'+x[0].toUpperCase()+x.slice(1))
+      .classList.toggle('active',x===v);
   }
 
-  deck[id] = current + 1;
-
-  saveDeck();
-  renderCards();
+  if(v==='home')updateTop();
+  if(v==='search')renderCards();
+  if(v==='deck')renderDeck();
+  if(v==='saved')renderSlots();
+  if(v==='settings')updateSettings();
 }
 
-function removeCard(id) {
+function updateTop(){
+  const d=deck();
+  const total=Object.values(d.cards).reduce((a,b)=>a+b,0);
 
-  if (!deck[id]) return;
+  document.getElementById('gameLabel').textContent=
+    GAME[currentGame].full+' / '+d.name;
 
-  deck[id]--;
+  document.getElementById('homeCards').textContent=
+    (db[currentGame]||[]).length;
 
-  if (deck[id] <= 0) {
-    delete deck[id];
-  }
+  document.getElementById('homeDeck').textContent=total;
+  document.getElementById('homeSlots').textContent=
+    `${state[currentGame].slots.length}/5`;
 
-  saveDeck();
-  renderDeck();
+  document.getElementById('deckBadge').textContent=total;
 }
 
-function saveDeck() {
-  localStorage.setItem(
-    "lovecaDeck",
-    JSON.stringify(deck)
+function buildFilters(){
+  const arr=db[currentGame]||[];
+
+  fill('typeFilter',[...new Set(arr.map(x=>x.type).filter(Boolean))]);
+  fill('seriesFilter',[...new Set(arr.map(x=>x.series||x.title).filter(Boolean))]);
+  fill('rarityFilter',[...new Set(arr.map(x=>x.rarity).filter(Boolean))]);
+}
+
+function fill(id,vals){
+  const s=document.getElementById(id);
+  const first=s.options[0].outerHTML;
+  const cur=s.value;
+
+  s.innerHTML=
+    first+
+    vals.sort((a,b)=>String(a).localeCompare(String(b),'ja'))
+      .map(v=>`<option value="${esc(v)}">${esc(v)}</option>`)
+      .join('');
+
+  if(vals.includes(cur))s.value=cur;
+}
+
+function renderCards(){
+  const q=(document.getElementById('searchBox').value||'').toLowerCase();
+  const t=document.getElementById('typeFilter').value;
+  const ser=document.getElementById('seriesFilter').value;
+  const r=document.getElementById('rarityFilter').value;
+  const arr=db[currentGame]||[];
+
+  const list=arr.filter(c=>
+    (!q||[c.name,c.id,c.type,c.series,c.title,c.rarity]
+      .some(v=>String(v||'').toLowerCase().includes(q)))
+    &&(!t||c.type===t)
+    &&(!ser||(c.series||c.title)===ser)
+    &&(!r||c.rarity===r)
   );
 
-  updateDeckCount();
+  document.getElementById('dbCount').textContent=arr.length;
+  document.getElementById('hitCount').textContent=list.length;
+
+  document.getElementById('cardList').innerHTML=
+    list.length
+    ?list.slice(0,250).map(cardHtml).join('')
+    :'<div class="empty">該当カードがありません</div>';
+
+  updateTop();
 }
 
-function getTotal() {
-  return Object.values(deck)
-    .reduce((a,b) => a + b, 0);
+function cardHtml(c){
+  const n=deck().cards[c.id]||0;
+  const img=c.image||c.imageUrl||'';
+
+  return `
+    <article class="card">
+      <div class="thumb">
+        ${img
+          ?`<img src="${esc(img)}" onerror="this.parentNode.textContent='画像なし'">`
+          :'画像なし'}
+      </div>
+
+      <div class="cardbody">
+        <div class="name">${esc(c.name)}</div>
+        <div class="meta">${esc(c.id)}</div>
+
+        <div class="tags">
+          <span class="tag">${esc(c.type||'未分類')}</span>
+          ${(c.series||c.title)?`<span class="tag">${esc(c.series||c.title)}</span>`:''}
+          ${c.rarity?`<span class="tag">${esc(c.rarity)}</span>`:''}
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" onclick="addCard('${js(c.id)}')">
+            ＋ デッキに追加 ${n?`(${n})`:''}
+          </button>
+          ${n?`<button class="btn" onclick="removeCard('${js(c.id)}')">−</button>`:''}
+        </div>
+      </div>
+    </article>
+  `;
 }
 
-function updateDeckCount() {
-
-  const total = getTotal();
-
-  document.getElementById("deckCount").textContent = total;
-  document.getElementById("deckBadge").textContent = total;
+function limitFor(c){
+  if(currentGame==='pokemon'&&/基本エネルギー/.test(c.type||''))return 99;
+  return 4;
 }
 
-function renderDeck() {
+function addCard(id){
+  const c=(db[currentGame]||[]).find(x=>x.id===id);
+  if(!c)return;
 
-  const list = document.getElementById("deckList");
+  const d=deck();
+  const n=d.cards[id]||0;
+  const lim=limitFor(c);
 
-  list.innerHTML = "";
-
-  const ids = Object.keys(deck);
-
-  if (!ids.length) {
-    list.innerHTML =
-      '<div class="empty">カードがまだありません</div>';
+  if(n>=lim){
+    alert(lim===4?'このカードは4枚までとしてチェックしています':'上限に達しました');
     return;
   }
 
-  ids.forEach(id => {
+  d.cards[id]=n+1;
+  persist();
+  renderCards();
+  renderDeck();
+}
 
-    const card = cards.find(c => c.id === id);
+function removeCard(id){
+  const d=deck();
+  if(!d.cards[id])return;
 
-    if (!card) return;
+  d.cards[id]--;
 
-    const div = document.createElement("div");
+  if(d.cards[id]<=0){
+    delete d.cards[id];
+  }
 
-    div.className = "deck-row";
+  persist();
+  renderCards();
+  renderDeck();
+}
 
-    div.innerHTML = `
-      <div>
-        <strong>${card.name}</strong><br>
-        ${deck[id]}枚
+function countDeck(){
+  const d=deck();
+  const arr=db[currentGame]||[];
+
+  let total=0,member=0,live=0,energy=0;
+
+  for(const [id,n] of Object.entries(d.cards)){
+    const c=arr.find(x=>x.id===id);
+    total+=n;
+    if(!c)continue;
+
+    if(currentGame==='loveca'){
+      if(c.type==='メンバー')member+=n;
+      else if(c.type==='ライブ')live+=n;
+      else if(c.type==='エネルギー')energy+=n;
+    }
+  }
+
+  return{total,member,live,energy};
+}
+
+function renderDeck(){
+  const d=deck();
+  const arr=db[currentGame]||[];
+
+  const entries=Object.entries(d.cards)
+    .map(([id,n])=>({
+      c:arr.find(x=>x.id===id),
+      id,
+      n
+    }))
+    .filter(x=>x.c);
+
+  document.getElementById('deckName').value=d.name;
+
+  const c=countDeck();
+  let rules=[];
+
+  if(currentGame==='loveca'){
+    rules=[
+      ['メンバー',`${c.member}/48`,c.member===48],
+      ['ライブ',`${c.live}/12`,c.live===12],
+      ['メイン',`${c.member+c.live}/60`,c.member+c.live===60],
+      ['エネルギー',`${c.energy}/12`,c.energy===12]
+    ];
+  }else if(currentGame==='pokemon'){
+    rules=[
+      ['デッキ枚数',`${c.total}/60`,c.total===60]
+    ];
+  }else{
+    rules=[
+      ['デッキ枚数',`${c.total}/50`,c.total===50]
+    ];
+  }
+
+  document.getElementById('rulePanel').innerHTML=
+    rules.map(([a,b,ok])=>{
+      const [x,y]=b.split('/').map(Number);
+      return `
+        <div class="rule">
+          <span>${a}</span>
+          <span class="${ok?'ok':x>y?'bad':'warn'}">
+            ${b}${ok?' ✓':''}
+          </span>
+        </div>
+      `;
+    }).join('');
+
+  document.getElementById('deckList').innerHTML=
+    entries.length
+    ?entries.map(x=>`
+      <div class="deckrow">
+        <div>
+          <b>${esc(x.c.name)}</b>
+          <div class="meta">${esc(x.c.id)} / ${esc(x.c.type||'')}</div>
+        </div>
+
+        <div class="qty">
+          <button onclick="removeCard('${js(x.id)}')">−</button>
+          <b>${x.n}</b>
+          <button onclick="addCard('${js(x.id)}')">＋</button>
+        </div>
       </div>
+    `).join('')
+    :'<div class="empty">カードがまだありません</div>';
 
-      <div class="deck-buttons">
-        <button onclick="addCard('${id}');renderDeck()">＋</button>
-        <button onclick="removeCard('${id}')">－</button>
-      </div>
-    `;
+  updateTop();
+}
 
-    list.appendChild(div);
+function renameCurrentDeck(){
+  deck().name=
+    document.getElementById('deckName').value||
+    GAME[currentGame].name+'デッキ';
+
+  persist();
+}
+
+function clearDeck(){
+  if(confirm('現在のデッキを全削除しますか？')){
+    deck().cards={};
+    persist();
+    renderDeck();
+    renderCards();
+  }
+}
+
+function exportDeck(){
+  const d=deck();
+  const arr=db[currentGame]||[];
+
+  let out=
+    `${GAME[currentGame].full}\n${d.name}\n\n`;
+
+  Object.entries(d.cards).forEach(([id,n])=>{
+    const c=arr.find(x=>x.id===id);
+    if(c){
+      out+=`${n} x ${c.name} (${id})\n`;
+    }
   });
+
+  document.getElementById('deckText').value=out;
 }
 
-function clearDeck() {
+function copyDeck(){
+  exportDeck();
 
-  if (!confirm("デッキをすべて削除しますか？")) {
+  const t=document.getElementById('deckText');
+  t.focus();
+  t.select();
+
+  try{
+    document.execCommand('copy');
+    alert('コピーしました');
+  }catch(e){
+    alert('長押しでコピーしてください');
+  }
+}
+
+function renderSlots(){
+  const s=state[currentGame];
+
+  document.getElementById('slotList').innerHTML=
+    s.slots.map((x,i)=>`
+      <div class="slot ${i===s.active?'active':''}">
+        <input value="${esc(x.name)}" onchange="renameSlot(${i},this.value)">
+        <button class="btn ${i===s.active?'primary':''}" onclick="activateSlot(${i})">
+          ${i===s.active?'編集中':'開く'}
+        </button>
+        ${s.slots.length>1
+          ?`<button class="btn danger" onclick="deleteSlot(${i})">削除</button>`
+          :''}
+      </div>
+    `).join('');
+
+  updateTop();
+}
+
+function newDeckSlot(){
+  const s=state[currentGame];
+
+  if(s.slots.length>=5){
+    alert('5スロットまでです');
     return;
   }
 
-  deck = {};
+  s.slots.push(
+    makeSlot(`${GAME[currentGame].name}デッキ ${s.slots.length+1}`)
+  );
 
-  saveDeck();
-  renderDeck();
-  renderCards();
-}
+  s.active=s.slots.length-1;
 
-function showCards() {
-
-  document.getElementById("cards").style.display = "block";
-  document.getElementById("deck").style.display = "none";
-
-  renderCards();
-}
-
-function showDeck() {
-
-  document.getElementById("cards").style.display = "none";
-  document.getElementById("deck").style.display = "block";
-
+  persist();
+  renderSlots();
   renderDeck();
 }
 
+function activateSlot(i){
+  state[currentGame].active=i;
+  persist();
+  renderSlots();
+  renderDeck();
+}
+
+function renameSlot(i,v){
+  state[currentGame].slots[i].name=
+    v||`${GAME[currentGame].name}デッキ`;
+
+  persist();
+  renderSlots();
+}
+
+function deleteSlot(i){
+  const s=state[currentGame];
+
+  if(!confirm('この保存デッキを削除しますか？'))return;
+
+  s.slots.splice(i,1);
+  s.active=Math.min(s.active,s.slots.length-1);
+
+  persist();
+  renderSlots();
+  renderDeck();
+}
+
+function norm(x,i){
+  return{
+    id:String(x.id||x.cardNo||x.cardno||`import-${i+1}`),
+    name:String(x.name||x.cardName||x.cardname||'名称未設定'),
+    type:String(x.type||x.kind||x.card_type||''),
+    series:String(x.series||x.set||x.work||x.product||''),
+    title:String(x.title||''),
+    rarity:String(x.rarity||''),
+    image:String(x.image||x.imageUrl||x.image_url||''),
+    color:String(x.color||'')
+  };
+}
+
+function importCards(){
+  try{
+    const raw=JSON.parse(
+      document.getElementById('importArea').value
+    );
+
+    if(!Array.isArray(raw)){
+      throw Error('JSON配列ではありません');
+    }
+
+    const map=new Map(
+      (db[currentGame]||[]).map(c=>[c.id,c])
+    );
+
+    raw.map(norm).forEach(c=>{
+      map.set(c.id,{
+        ...(map.get(c.id)||{}),
+        ...c
+      });
+    });
+
+    db[currentGame]=[...map.values()];
+
+    persist();
+    buildFilters();
+    renderCards();
+
+    document.getElementById('importStatus').textContent=
+      `${raw.length}件を取り込み、合計${db[currentGame].length}件になりました`;
+
+    document.getElementById('importArea').value='';
+
+  }catch(e){
+    document.getElementById('importStatus').textContent=
+      '取り込み失敗: '+e.message;
+  }
+}
+
+function exportCards(){
+  document.getElementById('importArea').value=
+    JSON.stringify(db[currentGame]||[],null,2);
+
+  document.getElementById('importStatus').textContent=
+    '現在のカードDBを書き出しました';
+}
+
+function resetCards(){
+  if(!confirm('現在のTCGのカードDBを初期状態に戻しますか？'))return;
+
+  db[currentGame]=clone(SEED[currentGame]);
+
+  persist();
+  buildFilters();
+  renderCards();
+  updateSettings();
+}
+
+function updateSettings(){
+  document.getElementById('ruleNote').textContent=
+    GAME[currentGame].rules+
+    '。大会参加前は必ず最新の公式ルール・使用制限も確認してください。';
+
+  document.getElementById('importStatus').textContent=
+    `現在: ${GAME[currentGame].name} / ${(db[currentGame]||[]).length}件`;
+
+  const sel=document.getElementById('themeSelect');
+  if(sel){
+    sel.value=localStorage.getItem('tdsTheme')||'system';
+  }
+}
+
+function applyTheme(mode){
+  const dark=
+    mode==='dark'||
+    (
+      mode==='system'&&
+      window.matchMedia&&
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+
+  document.documentElement.setAttribute(
+    'data-theme',
+    dark?'dark':'light'
+  );
+
+  const sel=document.getElementById('themeSelect');
+  if(sel)sel.value=mode;
+}
+
+function setTheme(mode){
+  localStorage.setItem('tdsTheme',mode);
+  applyTheme(mode);
+}
+
+const savedTheme=
+  localStorage.getItem('tdsTheme')||'system';
+
+applyTheme(savedTheme);
+
+if(window.matchMedia){
+  const mq=
+    window.matchMedia('(prefers-color-scheme: dark)');
+
+  if(mq.addEventListener){
+    mq.addEventListener('change',()=>{
+      if(
+        (localStorage.getItem('tdsTheme')||'system')
+        ==='system'
+      ){
+        applyTheme('system');
+      }
+    });
+  }
+}
+
+document.documentElement.style.setProperty(
+  '--accent',
+  GAME[currentGame].accent
+);
+
+renderChooser();
+buildFilters();
 renderCards();
-updateDeckCount();
+renderDeck();
+renderSlots();
+updateTop();
+updateSettings();
 </script>
 
 </body>
