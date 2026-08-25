@@ -1,0 +1,142 @@
+[
+  {
+    "id": "LL-bp1-001-R＋",
+    "name": "上原歩夢&澁谷かのん&日野下花帆",
+    "type": "メンバー",
+    "work": "シリーズ横断",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!N-bp1-001-R",
+    "name": "上原歩夢",
+    "type": "メンバー",
+    "work": "虹ヶ咲",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!N-bp1-003-R＋",
+    "name": "桜坂しずく",
+    "type": "メンバー",
+    "work": "虹ヶ咲",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!N-bp1-012-R＋",
+    "name": "鐘 嵐珠",
+    "type": "メンバー",
+    "work": "虹ヶ咲",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!N-sd1-008-SD",
+    "name": "エマ・ヴェルデ",
+    "type": "メンバー",
+    "work": "虹ヶ咲",
+    "set": "スタートデッキ"
+  },
+  {
+    "id": "PL!SP-bp7-001-R",
+    "name": "澁谷かのん",
+    "type": "メンバー",
+    "work": "スーパースター!!",
+    "set": "MELLOW MOMENT"
+  },
+  {
+    "id": "PL!SP-bp7-002-R",
+    "name": "唐 可可",
+    "type": "メンバー",
+    "work": "スーパースター!!",
+    "set": "MELLOW MOMENT"
+  },
+  {
+    "id": "PL!-bp3-012-RM",
+    "name": "南 ことり",
+    "type": "メンバー",
+    "work": "ラブライブ！",
+    "set": "Anniversary 2026"
+  },
+  {
+    "id": "PL!-bp5-001-R＋",
+    "name": "高坂穂乃果",
+    "type": "メンバー",
+    "work": "ラブライブ！",
+    "set": "Anniversary 2026"
+  },
+  {
+    "id": "PL!SP-bp1-023-SRL",
+    "name": "START!! True dreams",
+    "type": "ライブ",
+    "work": "スーパースター!!",
+    "set": "プレミアムブースター DUO"
+  },
+  {
+    "id": "PL!SP-bp1-024-SRL",
+    "name": "Tiny Stars",
+    "type": "ライブ",
+    "work": "スーパースター!!",
+    "set": "プレミアムブースター DUO"
+  },
+  {
+    "id": "PL!SP-bp1-025-SRL",
+    "name": "Starlight Prologue",
+    "type": "ライブ",
+    "work": "スーパースター!!",
+    "set": "プレミアムブースター DUO"
+  },
+  {
+    "id": "PL!-bp3-020-SECL",
+    "name": "Snow halation",
+    "type": "ライブ",
+    "work": "ラブライブ！",
+    "set": "Anniversary 2026"
+  },
+  {
+    "id": "PL!HS-bp2-019-L",
+    "name": "Bloom the smile, Bloom the dream!",
+    "type": "ライブ",
+    "work": "蓮ノ空",
+    "set": "ブースターパック"
+  },
+  {
+    "id": "LL-PR-004-PR",
+    "name": "愛♡スクリ～ム！",
+    "type": "ライブ",
+    "work": "シリーズ横断",
+    "set": "PRカード"
+  },
+  {
+    "id": "PL!-bp1-000-LLE",
+    "name": "高坂穂乃果",
+    "type": "エネルギー",
+    "work": "ラブライブ！",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!S-bp1-000-LLE",
+    "name": "高海千歌",
+    "type": "エネルギー",
+    "work": "サンシャイン!!",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!N-bp1-000-LLE",
+    "name": "上原歩夢",
+    "type": "エネルギー",
+    "work": "虹ヶ咲",
+    "set": "ブースターパック vol.1"
+  },
+  {
+    "id": "PL!-bp3-E01-RE",
+    "name": "園田海未",
+    "type": "エネルギー",
+    "work": "ラブライブ！",
+    "set": "Anniversary 2026"
+  },
+  {
+    "id": "PL!-bp4-E01-RE",
+    "name": "絢瀬絵里",
+    "type": "エネルギー",
+    "work": "ラブライブ！",
+    "set": "Anniversary 2026"
+  }
+]
