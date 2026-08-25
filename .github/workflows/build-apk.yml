@@ -7,6 +7,7 @@ on:
     paths:
       - 'app/**'
       - 'src/**'
+      - 'scripts/**'
       - 'build.gradle'
       - 'settings.gradle'
       - 'gradle.properties'
@@ -29,6 +30,12 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Build bundled card database
+        run: python3 scripts/build_card_data.py
+
+      - name: Show card database counts
+        run: cat src/main/assets/card_data_build_info.json
+
       - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -40,6 +47,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: lovelive-deck-builder-apk
+          name: tcg-deck-studio-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
