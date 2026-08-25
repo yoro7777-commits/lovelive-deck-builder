@@ -1,145 +1,387 @@
 #!/usr/bin/env python3
+
 import gzip
 import json
-import sys
+import re
+import subprocess
+import tempfile
 import urllib.request
 from pathlib import Path
 
 ASSETS = Path("src/main/assets")
 ASSETS.mkdir(parents=True, exist_ok=True)
 
-UA = "TCG-Deck-Studio-CardDataBuilder/1.0"
+UA = "TCG-Deck-Studio-CardDataBuilder/2.0"
 
-def download(url, timeout=90):
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
+
+def download(url, timeout=120):
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": UA}
+    )
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 
+
 def get_json(url, gz=False):
     raw = download(url)
+
     if gz or url.endswith(".gz"):
         raw = gzip.decompress(raw)
+
     return json.loads(raw.decode("utf-8-sig"))
+
 
 def safe(v):
     if v is None:
         return ""
+
     if isinstance(v, (list, tuple)):
-        return " / ".join(str(x) for x in v if x is not None)
+        return " / ".join(
+            str(x) for x in v if x is not None
+        )
+
     return str(v)
 
+
 def write_js(game, cards):
-    data = {}
+    unique = {}
+
     for c in cards:
         cid = safe(c.get("id")).strip()
         name = safe(c.get("name")).strip()
+
         if not cid or not name:
             continue
+
         c["id"] = cid
         c["name"] = name
-        data[cid] = c
+        unique[cid] = c
 
-    out = list(data.values())
-    payload = json.dumps(out, ensure_ascii=False, separators=(",", ":"))
+    out = list(unique.values())
+
+    if not out:
+        raise RuntimeError(
+            f"{game}: card count is 0"
+        )
+
+    payload = json.dumps(
+        out,
+        ensure_ascii=False,
+        separators=(",", ":")
+    )
 
     js = (
-        "window.TCG_CARD_DATA=window.TCG_CARD_DATA||{};\n"
+        "window.TCG_CARD_DATA="
+        "window.TCG_CARD_DATA||{};\n"
         f"window.TCG_CARD_DATA.{game}={payload};\n"
     )
 
     path = ASSETS / f"cards_{game}.js"
-    path.write_text(js, encoding="utf-8")
 
-    print(f"{game}: {len(out)} cards")
+    path.write_text(
+        js,
+        encoding="utf-8"
+    )
+
+    print(
+        f"{game}: {len(out)} cards -> {path}"
+    )
+
     return len(out)
 
+
+# =========================
+# ラブカ
+# =========================
+
+def loveca_image_url(x):
+    image = safe(
+        x.get("img")
+        or x.get("image")
+        or x.get("image_url")
+        or x.get("imageUrl")
+    ).strip()
+
+    if not image:
+        return ""
+
+    if image.startswith("http://") or image.startswith("https://"):
+        return image
+
+    if image.startswith("/"):
+        return (
+            "https://raw.githubusercontent.com/"
+            "wlt233/llocg_db/"
+            "efe152f90bde74fbf002e62956e036dd102655a2"
+            + image
+        )
+
+    return (
+        "https://raw.githubusercontent.com/"
+        "wlt233/llocg_db/"
+        "efe152f90bde74fbf002e62956e036dd102655a2/"
+        + image.lstrip("./")
+    )
+
+
 def build_loveca():
-    urls = [
-        "https://raw.githubusercontent.com/wlt233/llocg_db/master/json/cards.json",
-        "https://raw.githubusercontent.com/wlt233/llocg_db/main/json/cards.json",
-    ]
+    # 最新版 cards.json が空になっているため、
+    # データが存在していた直前のコミットを固定利用
+    url = (
+        "https://raw.githubusercontent.com/"
+        "wlt233/llocg_db/"
+        "efe152f90bde74fbf002e62956e036dd102655a2/"
+        "json/cards.json"
+    )
 
-    data = None
-    last_error = None
+    data = get_json(url)
 
-    for url in urls:
-        try:
-            data = get_json(url)
-            break
-        except Exception as e:
-            last_error = e
+    if isinstance(data, dict):
+        rows = list(data.values())
+    elif isinstance(data, list):
+        rows = data
+    else:
+        raise RuntimeError(
+            "LoveCa JSON format is invalid"
+        )
 
-    if data is None:
-        raise RuntimeError(f"LoveCa download failed: {last_error}")
-
-    rows = list(data.values()) if isinstance(data, dict) else data
     cards = []
 
-    for i, x in enumerate(rows or []):
+    for i, x in enumerate(rows):
         if not isinstance(x, dict):
             continue
 
-        cid = safe(x.get("card_no") or x.get("id") or f"LL-{i+1}")
-        name = safe(x.get("name")).strip()
+        cid = safe(
+            x.get("card_no")
+            or x.get("cardNo")
+            or x.get("id")
+            or f"LL-{i+1}"
+        ).strip()
+
+        name = safe(
+            x.get("name")
+            or x.get("card_name")
+            or x.get("cardName")
+        ).strip()
 
         if not name:
             name = "エネルギー " + cid
 
+        typ = safe(
+            x.get("type")
+            or x.get("card_type")
+        )
+
+        series = safe(
+            x.get("series")
+            or x.get("group")
+            or x.get("title")
+        )
+
+        product = safe(
+            x.get("product")
+            or x.get("pack")
+            or x.get("set")
+        )
+
+        rarity = safe(
+            x.get("rare")
+            or x.get("rarity")
+        )
+
+        image = loveca_image_url(x)
+
         cards.append({
             "id": cid,
             "name": name,
-            "type": safe(x.get("type")),
-            "series": safe(x.get("series")),
-            "product": safe(x.get("product")),
-            "rarity": safe(x.get("rare") or x.get("rarity")),
-            "image": "",
+            "type": typ,
+            "series": series,
+            "product": product,
+            "rarity": rarity,
+            "image": image,
             "color": safe(x.get("color")),
         })
 
+    if len(cards) < 100:
+        raise RuntimeError(
+            f"LoveCa data too small: {len(cards)}"
+        )
+
     return cards
 
-def build_pokemon():
-    data = get_json(
-        "https://raw.githubusercontent.com/1ulce/pokemon-card-data/main/index/all.json"
+
+# =========================
+# ポケカ
+# =========================
+
+def pokemon_yaml_image(path):
+    try:
+        text = path.read_text(
+            encoding="utf-8"
+        )
+    except Exception:
+        return ""
+
+    m = re.search(
+        r"^\s*image_url:\s*(.+?)\s*$",
+        text,
+        re.MULTILINE
     )
 
-    rows = data.get("faces", []) if isinstance(data, dict) else data
+    if not m:
+        return ""
+
+    value = m.group(1).strip()
+
+    if (
+        len(value) >= 2
+        and value[0] == value[-1]
+        and value[0] in "\"'"
+    ):
+        value = value[1:-1]
+
+    if value.lower() in (
+        "null",
+        "none",
+        "~"
+    ):
+        return ""
+
+    return value
+
+
+def clone_pokemon_data():
+    temp = Path(
+        tempfile.mkdtemp(
+            prefix="pokemon-card-data-"
+        )
+    )
+
+    repo = temp / "repo"
+
+    subprocess.run(
+        [
+            "git",
+            "clone",
+            "--depth",
+            "1",
+            "--quiet",
+            "https://github.com/"
+            "1ulce/pokemon-card-data.git",
+            str(repo),
+        ],
+        check=True
+    )
+
+    return repo
+
+
+def build_pokemon():
+    index = get_json(
+        "https://raw.githubusercontent.com/"
+        "1ulce/pokemon-card-data/main/"
+        "index/all.json"
+    )
+
+    rows = (
+        index.get("faces", [])
+        if isinstance(index, dict)
+        else index
+    )
+
+    repo = clone_pokemon_data()
+
     cards = []
 
     for i, x in enumerate(rows or []):
         if not isinstance(x, dict):
             continue
 
-        slug = safe(x.get("slug") or f"pokemon-{i+1}")
-        typ = safe(x.get("card_type"))
+        slug = safe(
+            x.get("slug")
+            or f"pokemon-{i+1}"
+        )
+
+        typ = safe(
+            x.get("card_type")
+        )
 
         typ = {
             "Pokémon": "ポケモン",
             "Pokemon": "ポケモン",
             "Trainer": "トレーナーズ",
-            "Energy": "エネルギー"
-        }.get(typ, typ)
+            "Energy": "エネルギー",
+        }.get(
+            typ,
+            typ
+        )
+
+        yaml_path = (
+            repo
+            / "cards"
+            / f"{slug}.yml"
+        )
+
+        image = ""
+
+        if yaml_path.exists():
+            image = pokemon_yaml_image(
+                yaml_path
+            )
 
         cards.append({
             "id": slug,
-            "name": safe(x.get("name_ja") or x.get("name_en") or slug),
+            "name": safe(
+                x.get("name_ja")
+                or x.get("name_en")
+                or slug
+            ),
             "type": typ,
-            "series": safe(x.get("first_set")),
-            "product": safe(x.get("first_set")),
+            "series": safe(
+                x.get("first_set")
+            ),
+            "product": safe(
+                x.get("first_set")
+            ),
             "rarity": "",
-            "regulation": safe(x.get("regulation_mark")),
-            "image": "",
+            "regulation": safe(
+                x.get("regulation_mark")
+            ),
+            "image": image,
+            "name_en": safe(
+                x.get("name_en")
+            ),
         })
+
+    if len(cards) < 500:
+        raise RuntimeError(
+            f"Pokemon data too small: {len(cards)}"
+        )
 
     return cards
 
-def recursive_products(obj, set_name="", out=None):
+
+# =========================
+# ユニアリ
+# =========================
+
+def recursive_products(
+    obj,
+    set_name="",
+    out=None
+):
     if out is None:
         out = []
 
     if isinstance(obj, list):
         for x in obj:
-            recursive_products(x, set_name, out)
+            recursive_products(
+                x,
+                set_name,
+                out
+            )
+
         return out
 
     if not isinstance(obj, dict):
@@ -154,33 +396,62 @@ def recursive_products(obj, set_name="", out=None):
         or set_name
     )
 
-    for key in ("products", "items", "cards"):
+    for key in (
+        "products",
+        "items",
+        "cards"
+    ):
         val = obj.get(key)
 
         if isinstance(val, list):
             for x in val:
                 if isinstance(x, dict):
                     y = dict(x)
-                    y.setdefault("_set_name", local_set)
+
+                    y.setdefault(
+                        "_set_name",
+                        local_set
+                    )
+
                     out.append(y)
 
     for k, v in obj.items():
-        if k in ("products", "items", "cards"):
+        if k in (
+            "products",
+            "items",
+            "cards"
+        ):
             continue
 
-        if isinstance(v, (dict, list)):
-            recursive_products(v, local_set, out)
+        if isinstance(
+            v,
+            (dict, list)
+        ):
+            recursive_products(
+                v,
+                local_set,
+                out
+            )
 
     return out
 
+
 def build_union():
     url = (
-        "https://github.com/HanClinto/tcgjson/releases/"
-        "latest/download/union-arena.json.gz"
+        "https://github.com/"
+        "HanClinto/tcgjson/releases/"
+        "latest/download/"
+        "union-arena.json.gz"
     )
 
-    data = get_json(url, gz=True)
-    rows = recursive_products(data)
+    data = get_json(
+        url,
+        gz=True
+    )
+
+    rows = recursive_products(
+        data
+    )
 
     cards = []
     seen = set()
@@ -226,7 +497,9 @@ def build_union():
             or x.get("type")
         )
 
-        rarity = safe(x.get("rarity"))
+        rarity = safe(
+            x.get("rarity")
+        )
 
         set_name = safe(
             x.get("_set_name")
@@ -239,6 +512,7 @@ def build_union():
             or x.get("image_url")
             or x.get("image")
             or x.get("imageURL")
+            or x.get("images")
         )
 
         cards.append({
@@ -253,10 +527,16 @@ def build_union():
 
     if len(cards) < 100:
         raise RuntimeError(
-            f"Union Arena parser found only {len(cards)} cards"
+            f"Union Arena data too small: "
+            f"{len(cards)}"
         )
 
     return cards
+
+
+# =========================
+# 実行
+# =========================
 
 def main():
     counts = {}
@@ -268,21 +548,39 @@ def main():
     }
 
     for game, fn in builders.items():
-        cards = fn()
-        counts[game] = write_js(game, cards)
+        print(
+            f"Building {game}..."
+        )
 
-    info = ASSETS / "card_data_build_info.json"
+        cards = fn()
+
+        counts[game] = write_js(
+            game,
+            cards
+        )
+
+    info = (
+        ASSETS
+        / "card_data_build_info.json"
+    )
 
     info.write_text(
         json.dumps(
-            {"counts": counts},
+            {
+                "counts": counts,
+                "version": 2
+            },
             ensure_ascii=False,
             indent=2
         ),
-        encoding="utf-8",
+        encoding="utf-8"
     )
 
-    print("Card data build complete:", counts)
+    print(
+        "Card data build complete:",
+        counts
+    )
+
 
 if __name__ == "__main__":
     main()
