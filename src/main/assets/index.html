@@ -28,9 +28,7 @@ html[data-theme="dark"]{
   --shadow:0 4px 16px #00000055;
 }
 
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 html,body{
   margin:0;
@@ -48,13 +46,9 @@ button,input,select,textarea{
   font:inherit;
 }
 
-button{
-  cursor:pointer;
-}
+button{cursor:pointer}
 
-/* =========================
-   上部ヘッダー
-========================= */
+/* ===== 上部 ===== */
 
 header{
   position:sticky;
@@ -62,12 +56,7 @@ header{
   z-index:100;
   background:var(--surface);
   border-bottom:1px solid var(--line);
-
-  padding-top:
-    max(
-      4px,
-      env(safe-area-inset-top)
-    );
+  padding-top:max(4px,env(safe-area-inset-top));
 }
 
 .top{
@@ -103,7 +92,6 @@ header{
 .top-title h1{
   margin:0;
   font-size:17px;
-  line-height:1.15;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -111,7 +99,6 @@ header{
 
 .top-title small{
   display:block;
-  margin-top:2px;
   color:var(--muted);
   font-size:9px;
   white-space:nowrap;
@@ -133,13 +120,9 @@ header{
   color:var(--muted);
 }
 
-.top-stat b{
-  font-size:12px;
-}
+.top-stat b{font-size:12px}
 
-/* =========================
-   共通
-========================= */
+/* ===== 共通 ===== */
 
 main{
   max-width:1100px;
@@ -181,17 +164,9 @@ main{
   background:var(--danger);
 }
 
-.btn.full{
-  width:100%;
-}
+.btn.full{width:100%}
 
-.hidden{
-  display:none!important;
-}
-
-/* =========================
-   戻るボタン
-========================= */
+.hidden{display:none!important}
 
 .page-head{
   display:flex;
@@ -217,9 +192,7 @@ main{
   font-weight:900;
 }
 
-/* =========================
-   ゲーム選択
-========================= */
+/* ===== ゲーム ===== */
 
 .game-grid{
   display:grid;
@@ -247,7 +220,7 @@ main{
   border-radius:14px;
   box-shadow:0 3px 10px #0002;
   display:block;
-  margin:0 auto;
+  margin:auto;
 }
 
 .game-name{
@@ -279,9 +252,7 @@ main{
 .pokemon-btn{background:#1767d8}
 .union-btn{background:#d7252e}
 
-/* =========================
-   クイックメニュー
-========================= */
+/* ===== クイック ===== */
 
 .quick-grid{
   display:grid;
@@ -306,9 +277,7 @@ main{
   margin-bottom:3px;
 }
 
-/* =========================
-   統計
-========================= */
+/* ===== 統計 ===== */
 
 .stat-grid{
   display:grid;
@@ -334,9 +303,7 @@ main{
   font-size:9px;
 }
 
-/* =========================
-   検索
-========================= */
+/* ===== 検索 ===== */
 
 .searchbox{
   width:100%;
@@ -363,16 +330,13 @@ main{
   background:var(--surface);
   color:var(--text);
   font-size:11px;
-  text-overflow:ellipsis;
 }
 
 .filters select:last-child{
   grid-column:1/-1;
 }
 
-/* =========================
-   カード一覧
-========================= */
+/* ===== カード ===== */
 
 .card-grid{
   display:grid;
@@ -406,7 +370,6 @@ main{
   width:100%;
   height:100%;
   object-fit:cover;
-  display:block;
 }
 
 .card-body{
@@ -424,7 +387,6 @@ main{
   color:var(--muted);
   font-size:10px;
   margin-top:2px;
-  word-break:break-word;
 }
 
 .tags{
@@ -457,9 +419,7 @@ main{
   font-size:10px;
 }
 
-/* =========================
-   デッキ
-========================= */
+/* ===== デッキ ===== */
 
 .deck-grid{
   display:grid;
@@ -507,7 +467,6 @@ main{
 .deck-name{
   margin-top:4px;
   font-size:9px;
-  line-height:1.25;
   font-weight:800;
   min-height:23px;
 }
@@ -530,9 +489,13 @@ main{
   font-weight:900;
 }
 
-/* =========================
-   保存
-========================= */
+.deck-tools{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+
+/* ===== 保存 ===== */
 
 .slot-row{
   display:flex;
@@ -549,9 +512,7 @@ main{
   font-size:12px;
 }
 
-/* =========================
-   プレビュー
-========================= */
+/* ===== プレビュー ===== */
 
 .preview{
   position:fixed;
@@ -561,15 +522,12 @@ main{
   display:none;
   align-items:center;
   justify-content:center;
-  padding:
-    max(14px,env(safe-area-inset-top))
-    14px
-    max(14px,env(safe-area-inset-bottom));
+  padding:max(14px,env(safe-area-inset-top))
+          14px
+          max(14px,env(safe-area-inset-bottom));
 }
 
-.preview.show{
-  display:flex;
-}
+.preview.show{display:flex}
 
 .preview-box{
   width:min(94vw,460px);
@@ -600,9 +558,12 @@ main{
   font-weight:900;
 }
 
-/* =========================
-   下部ナビ
-========================= */
+.deck-image-preview img{
+  max-height:none;
+  width:100%;
+}
+
+/* ===== 下部 ===== */
 
 .bottom{
   position:fixed;
@@ -614,9 +575,7 @@ main{
   grid-template-columns:repeat(5,1fr);
   background:var(--surface);
   border-top:1px solid var(--line);
-
-  padding-bottom:
-    env(safe-area-inset-bottom);
+  padding-bottom:env(safe-area-inset-bottom);
 }
 
 .bottom button{
@@ -635,7 +594,6 @@ main{
 .bottom .ico{
   display:block;
   font-size:18px;
-  margin-bottom:1px;
 }
 
 textarea{
@@ -649,60 +607,21 @@ textarea{
   color:var(--text);
 }
 
-/* =========================
-   画面幅
-========================= */
-
 @media(max-width:370px){
-
-  .game-grid{
-    grid-template-columns:repeat(3,1fr);
-    gap:5px;
-  }
-
-  .game-card{
-    padding:5px;
-  }
-
-  .game-name{
-    font-size:12px;
-  }
-
-  .game-desc{
-    display:none;
-  }
-
-  .game-card button{
-    font-size:9px;
-    padding:7px 2px;
-  }
-
-  .top-stat{
-    display:none;
-  }
+  .game-grid{gap:5px}
+  .game-card{padding:5px}
+  .game-name{font-size:12px}
+  .game-desc{display:none}
+  .game-card button{font-size:9px}
+  .top-stat{display:none}
 }
 
 @media(min-width:650px){
-
-  .game-icon{
-    max-width:150px;
-  }
-
-  .filters{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-  .filters select:last-child{
-    grid-column:auto;
-  }
-
-  .card-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-
-  .deck-grid{
-    grid-template-columns:repeat(5,1fr);
-  }
+  .game-icon{max-width:150px}
+  .filters{grid-template-columns:repeat(3,1fr)}
+  .filters select:last-child{grid-column:auto}
+  .card-grid{grid-template-columns:repeat(2,1fr)}
+  .deck-grid{grid-template-columns:repeat(5,1fr)}
 }
 </style>
 </head>
@@ -736,17 +655,13 @@ TCG<br>DECK
 
 <main>
 
-<!-- =====================
-ホーム
-===================== -->
+<!-- ホーム -->
 
 <section id="homeView">
 
 <div class="panel">
 
-<div class="section-title">
-ゲームを選択
-</div>
+<div class="section-title">ゲームを選択</div>
 
 <div class="game-grid">
 
@@ -765,16 +680,11 @@ onerror="this.style.display='none'">
 ラブライブ！オフィシャルカードゲーム
 </div>
 
-<button
-class="loveca-btn"
-onclick="chooseGame('loveca')">
-
+<button class="loveca-btn" onclick="chooseGame('loveca')">
 選択
-
 </button>
 
 </div>
-
 
 <div id="game-pokemon" class="game-card">
 
@@ -791,16 +701,11 @@ onerror="this.style.display='none'">
 ポケモンカードゲーム
 </div>
 
-<button
-class="pokemon-btn"
-onclick="chooseGame('pokemon')">
-
+<button class="pokemon-btn" onclick="chooseGame('pokemon')">
 選択
-
 </button>
 
 </div>
-
 
 <div id="game-union" class="game-card">
 
@@ -817,19 +722,14 @@ onerror="this.style.display='none'">
 UNION ARENA
 </div>
 
-<button
-class="union-btn"
-onclick="chooseGame('union')">
-
+<button class="union-btn" onclick="chooseGame('union')">
 選択
-
 </button>
 
 </div>
 
 </div>
 </div>
-
 
 <div class="panel">
 
@@ -839,45 +739,28 @@ onclick="chooseGame('union')">
 
 <div class="quick-grid">
 
-<button
-class="quick-btn"
-onclick="showView('search')">
-
+<button class="quick-btn" onclick="showView('search')">
 <span class="ico">⌕</span>
 検索
-
 </button>
 
-<button
-class="quick-btn"
-onclick="showView('deck')">
-
+<button class="quick-btn" onclick="showView('deck')">
 <span class="ico">▣</span>
 デッキ
-
 </button>
 
-<button
-class="quick-btn"
-onclick="exportDeck();showView('deck')">
-
+<button class="quick-btn" onclick="exportDeck();showView('deck')">
 <span class="ico">▤</span>
 出力
-
 </button>
 
-<button
-class="quick-btn"
-onclick="showView('saved')">
-
+<button class="quick-btn" onclick="showView('saved')">
 <span class="ico">□</span>
 保存
-
 </button>
 
 </div>
 </div>
-
 
 <div class="stat-grid">
 
@@ -901,20 +784,14 @@ onclick="showView('saved')">
 </section>
 
 
-<!-- =====================
-検索
-===================== -->
+<!-- 検索 -->
 
 <section id="searchView" class="hidden">
 
 <div class="page-head">
 
-<button
-class="back-home"
-onclick="showView('home')">
-
+<button class="back-home" onclick="showView('home')">
 ← ホーム
-
 </button>
 
 <div class="page-title">
@@ -922,7 +799,6 @@ onclick="showView('home')">
 </div>
 
 </div>
-
 
 <div class="panel">
 
@@ -935,25 +811,15 @@ oninput="renderCards()">
 
 <div class="filters">
 
-<select
-id="filter1"
-onchange="renderCards()">
-</select>
+<select id="filter1" onchange="renderCards()"></select>
 
-<select
-id="filter2"
-onchange="renderCards()">
-</select>
+<select id="filter2" onchange="renderCards()"></select>
 
-<select
-id="filter3"
-onchange="renderCards()">
-</select>
+<select id="filter3" onchange="renderCards()"></select>
 
 </div>
 
 </div>
-
 
 <div class="stat-grid">
 
@@ -974,33 +840,23 @@ onchange="renderCards()">
 
 </div>
 
-
 <div class="section-title" style="margin-top:13px">
 カード一覧
 </div>
 
-<div
-id="cardList"
-class="card-grid">
-</div>
+<div id="cardList" class="card-grid"></div>
 
 </section>
 
 
-<!-- =====================
-デッキ
-===================== -->
+<!-- デッキ -->
 
 <section id="deckView" class="hidden">
 
 <div class="page-head">
 
-<button
-class="back-home"
-onclick="showView('home')">
-
+<button class="back-home" onclick="showView('home')">
 ← ホーム
-
 </button>
 
 <div class="page-title">
@@ -1008,7 +864,6 @@ onclick="showView('home')">
 </div>
 
 </div>
-
 
 <div class="panel">
 
@@ -1020,42 +875,41 @@ oninput="renameDeck()">
 
 </div>
 
-
 <div class="section-title">
 デッキ画像一覧
 </div>
 
-<div
-id="deckGrid"
-class="deck-grid">
-</div>
-
+<div id="deckGrid" class="deck-grid"></div>
 
 <div class="panel" style="margin-top:11px">
+
+<div class="deck-tools">
+
+<button
+class="btn primary"
+onclick="createDeckImage()">
+🖼 デッキ画像
+</button>
 
 <button
 class="btn primary"
 onclick="exportDeck()">
-
 レシピ出力
-
 </button>
 
 <button
 class="btn"
 onclick="copyDeck()">
-
 コピー
-
 </button>
 
 <button
 class="btn danger"
 onclick="clearDeck()">
-
 全削除
-
 </button>
+
+</div>
 
 <textarea id="deckText"></textarea>
 
@@ -1064,20 +918,14 @@ onclick="clearDeck()">
 </section>
 
 
-<!-- =====================
-保存
-===================== -->
+<!-- 保存 -->
 
 <section id="savedView" class="hidden">
 
 <div class="page-head">
 
-<button
-class="back-home"
-onclick="showView('home')">
-
+<button class="back-home" onclick="showView('home')">
 ← ホーム
-
 </button>
 
 <div class="page-title">
@@ -1085,7 +933,6 @@ onclick="showView('home')">
 </div>
 
 </div>
-
 
 <div class="panel">
 
@@ -1095,9 +942,7 @@ onclick="showView('home')">
 class="btn primary full"
 style="margin-top:9px"
 onclick="newSlot()">
-
 ＋ 新しいデッキ
-
 </button>
 
 </div>
@@ -1105,20 +950,14 @@ onclick="newSlot()">
 </section>
 
 
-<!-- =====================
-設定
-===================== -->
+<!-- 設定 -->
 
 <section id="settingsView" class="hidden">
 
 <div class="page-head">
 
-<button
-class="back-home"
-onclick="showView('home')">
-
+<button class="back-home" onclick="showView('home')">
 ← ホーム
-
 </button>
 
 <div class="page-title">
@@ -1126,7 +965,6 @@ onclick="showView('home')">
 </div>
 
 </div>
-
 
 <div class="panel">
 
@@ -1139,22 +977,13 @@ id="themeSelect"
 class="searchbox"
 onchange="setTheme(this.value)">
 
-<option value="system">
-端末設定
-</option>
-
-<option value="light">
-ライト
-</option>
-
-<option value="dark">
-ダーク
-</option>
+<option value="system">端末設定</option>
+<option value="light">ライト</option>
+<option value="dark">ダーク</option>
 
 </select>
 
 </div>
-
 
 <div class="panel">
 
@@ -1162,18 +991,13 @@ onchange="setTheme(this.value)">
 カードデータ
 </div>
 
-<div
-id="dbInfo"
-class="meta">
-</div>
+<div id="dbInfo" class="meta"></div>
 
 <button
 class="btn danger full"
 style="margin-top:9px"
 onclick="refreshDB()">
-
 カードDBを最新版に更新
-
 </button>
 
 </div>
@@ -1183,95 +1007,99 @@ onclick="refreshDB()">
 </main>
 
 
-<!-- =====================
-下部ナビ
-===================== -->
+<!-- 下部ナビ -->
 
 <nav class="bottom">
 
-<button
-id="navHome"
-class="active"
-onclick="showView('home')">
-
+<button id="navHome" class="active" onclick="showView('home')">
 <span class="ico">⌂</span>
 ホーム
-
 </button>
 
-<button
-id="navSearch"
-onclick="showView('search')">
-
+<button id="navSearch" onclick="showView('search')">
 <span class="ico">⌕</span>
 検索
-
 </button>
 
-<button
-id="navDeck"
-onclick="showView('deck')">
-
+<button id="navDeck" onclick="showView('deck')">
 <span class="ico">▣</span>
 デッキ
-
 </button>
 
-<button
-id="navSaved"
-onclick="showView('saved')">
-
+<button id="navSaved" onclick="showView('saved')">
 <span class="ico">▤</span>
 保存
-
 </button>
 
-<button
-id="navSettings"
-onclick="showView('settings')">
-
+<button id="navSettings" onclick="showView('settings')">
 <span class="ico">⚙</span>
 設定
-
 </button>
 
 </nav>
 
 
-<!-- =====================
-画像プレビュー
-===================== -->
+<!-- カード画像プレビュー -->
 
-<div
-id="preview"
-class="preview"
-onclick="closePreviewBg(event)">
+<div id="preview" class="preview" onclick="closePreviewBg(event)">
 
 <div class="preview-box">
 
 <div class="preview-top">
 
-<button
-class="btn"
-onclick="closePreview()">
-
+<button class="btn" onclick="closePreview()">
 ✕ 閉じる
-
 </button>
 
 </div>
 
 <img id="previewImage">
 
-<div
-id="previewTitle"
-class="preview-title">
+<div id="previewTitle" class="preview-title"></div>
+
+<div id="previewMeta" class="meta" style="text-align:center"></div>
+
 </div>
 
+</div>
+
+
+<!-- デッキ画像プレビュー -->
+
+<div id="deckImagePreview" class="preview">
+
+<div class="preview-box deck-image-preview">
+
+<div class="preview-top">
+
+<button class="btn" onclick="closeDeckImagePreview()">
+✕ 閉じる
+</button>
+
+</div>
+
+<div class="preview-title" style="margin-bottom:8px">
+デッキ画像
+</div>
+
+<img id="deckGeneratedImage">
+
 <div
-id="previewMeta"
-class="meta"
-style="text-align:center">
+style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:7px;
+margin-top:10px;
+">
+
+<button class="btn primary" onclick="saveDeckImage()">
+保存
+</button>
+
+<button class="btn" onclick="shareDeckImage()">
+共有
+</button>
+
 </div>
 
 </div>
@@ -1285,7 +1113,7 @@ style="text-align:center">
 
 <script>
 
-const DATA_VERSION = 21;
+const DATA_VERSION = 22;
 
 const GAME = {
 
@@ -1312,7 +1140,7 @@ const GAME = {
 
 function bundled(){
 
-  return {
+  return{
 
     loveca:
       window.TCG_CARD_DATA?.loveca || [],
@@ -1330,7 +1158,6 @@ function bundled(){
 
 let db = bundled();
 
-
 let currentGame =
   localStorage.getItem("tdsGame")
   || "loveca";
@@ -1340,12 +1167,13 @@ let state;
 
 try{
 
-  state = JSON.parse(
-    localStorage.getItem(
-      "tdsDeckState"
-    )
-    || "{}"
-  );
+  state =
+    JSON.parse(
+      localStorage.getItem(
+        "tdsDeckState"
+      )
+      || "{}"
+    );
 
 }catch(e){
 
@@ -1385,9 +1213,7 @@ function currentDeck(){
     state[currentGame];
 
   if(!s.slots[s.active]){
-
     s.active = 0;
-
   }
 
   return s.slots[s.active];
@@ -1415,16 +1241,16 @@ function save(){
 function esc(v){
 
   return String(v ?? "")
-    .replace(
-      /[&<>"']/g,
-      c=>({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;"
-      }[c])
-    );
+  .replace(
+    /[&<>"']/g,
+    c=>({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[c])
+  );
 
 }
 
@@ -1432,8 +1258,8 @@ function esc(v){
 function js(v){
 
   return String(v)
-    .replace(/\\/g,"\\\\")
-    .replace(/'/g,"\\'");
+  .replace(/\\/g,"\\\\")
+  .replace(/'/g,"\\'");
 
 }
 
@@ -1447,7 +1273,8 @@ function imageOf(c){
     "";
 
   if(
-    typeof value !== "string"
+    typeof value !==
+    "string"
   ){
     return "";
   }
@@ -1504,14 +1331,15 @@ function regulationOf(c){
 
 function chooseGame(game){
 
-  currentGame = game;
+  currentGame =
+    game;
 
   document.documentElement
-    .style
-    .setProperty(
-      "--accent",
-      GAME[game].accent
-    );
+  .style
+  .setProperty(
+    "--accent",
+    GAME[game].accent
+  );
 
   localStorage.setItem(
     "tdsGame",
@@ -1519,14 +1347,14 @@ function chooseGame(game){
   );
 
   document
-    .querySelectorAll(
-      ".game-card"
-    )
-    .forEach(
-      x=>
-        x.classList
-        .remove("active")
-    );
+  .querySelectorAll(
+    ".game-card"
+  )
+  .forEach(
+    x=>
+      x.classList
+      .remove("active")
+  );
 
   const selected =
     document.getElementById(
@@ -1534,20 +1362,13 @@ function chooseGame(game){
     );
 
   if(selected){
-
-    selected.classList
-      .add("active");
-
+    selected.classList.add("active");
   }
 
   buildFilters();
-
   renderCards();
-
   renderDeck();
-
   renderSlots();
-
   updateStats();
 
 }
@@ -1590,7 +1411,8 @@ function fillSelect(
 
     +
 
-    unique.map(
+    unique
+    .map(
       x=>
         `<option value="${esc(x)}">
           ${esc(x)}
@@ -1601,9 +1423,7 @@ function fillSelect(
   if(
     unique.includes(old)
   ){
-
     element.value = old;
-
   }
 
 }
@@ -1630,7 +1450,10 @@ function buildFilters(){
     );
 
 
-  if(currentGame==="pokemon"){
+  if(
+    currentGame ===
+    "pokemon"
+  ){
 
     fillSelect(
       f1,
@@ -1652,7 +1475,10 @@ function buildFilters(){
 
   }
 
-  else if(currentGame==="union"){
+  else if(
+    currentGame ===
+    "union"
+  ){
 
     fillSelect(
       f1,
@@ -1705,7 +1531,8 @@ function renderCards(){
     (
       document.getElementById(
         "searchBox"
-      ).value || ""
+      ).value
+      || ""
     )
     .toLowerCase();
 
@@ -1755,10 +1582,11 @@ function renderCards(){
 
 
       if(
-        currentGame==="pokemon"
+        currentGame ===
+        "pokemon"
       ){
 
-        return (
+        return(
 
           (!a ||
             saleTitleOf(card)===a)
@@ -1779,10 +1607,11 @@ function renderCards(){
 
 
       if(
-        currentGame==="union"
+        currentGame ===
+        "union"
       ){
 
-        return (
+        return(
 
           (!a ||
             workOf(card)===a)
@@ -1802,7 +1631,7 @@ function renderCards(){
       }
 
 
-      return (
+      return(
 
         (!a ||
           workOf(card)===a)
@@ -1840,16 +1669,15 @@ function renderCards(){
     filtered.length
 
     ? filtered
-        .slice(0,250)
-        .map(cardHtml)
-        .join("")
+      .slice(0,250)
+      .map(cardHtml)
+      .join("")
 
     : `
       <div class="panel">
-        該当カードがありません
+      該当カードがありません
       </div>
     `;
-
 
   updateStats();
 
@@ -1863,160 +1691,149 @@ function cardHtml(card){
 
   const qty =
     currentDeck()
-    .cards[card.id] || 0;
+    .cards[card.id]
+    || 0;
 
   const work =
     workOf(card);
 
 
-  return `
+  return`
 
-    <div class="card">
+  <div class="card">
 
-      <div class="thumb">
+  <div class="thumb">
 
-        ${
-          image
-          ? `
-            <img
-              src="${esc(image)}"
-              loading="lazy"
-              onclick="
-                openPreview(
-                  '${js(card.id)}'
-                )
-              "
-              onerror="
-                this.style.display='none';
-              ">
-          `
-          : "画像なし"
-        }
+  ${
+    image
+    ?`
+    <img
+    src="${esc(image)}"
+    loading="lazy"
+    onclick="
+    openPreview(
+    '${js(card.id)}'
+    )
+    "
+    onerror="
+    this.style.display='none'
+    ">
+    `
+    :"画像なし"
+  }
 
-      </div>
+  </div>
 
+  <div class="card-body">
 
-      <div class="card-body">
+  <div class="card-name">
+  ${esc(card.name)}
+  </div>
 
-        <div class="card-name">
-          ${esc(card.name)}
-        </div>
+  <div class="meta">
+  ${esc(card.id)}
+  </div>
 
-        <div class="meta">
-          ${esc(card.id)}
-        </div>
+  <div class="tags">
 
+  ${
+    currentGame==="pokemon"
+    &&
+    saleTitleOf(card)
+    ?`
+    <span class="tag">
+    ${esc(saleTitleOf(card))}
+    </span>
+    `
+    :""
+  }
 
-        <div class="tags">
+  ${
+    currentGame==="pokemon"
+    &&
+    regulationOf(card)
+    ?`
+    <span class="tag">
+    Reg ${esc(regulationOf(card))}
+    </span>
+    `
+    :""
+  }
 
-          ${
-            currentGame==="pokemon"
-            &&
-            saleTitleOf(card)
-            ? `
-              <span class="tag">
-                ${esc(
-                  saleTitleOf(card)
-                )}
-              </span>
-            `
-            : ""
-          }
+  ${
+    currentGame==="union"
+    &&
+    work
+    ?`
+    <span class="tag">
+    ${esc(work)}
+    </span>
+    `
+    :""
+  }
 
+  ${
+    card.type
+    ?`
+    <span class="tag">
+    ${esc(card.type)}
+    </span>
+    `
+    :""
+  }
 
-          ${
-            currentGame==="pokemon"
-            &&
-            regulationOf(card)
-            ? `
-              <span class="tag">
-                Reg ${esc(
-                  regulationOf(card)
-                )}
-              </span>
-            `
-            : ""
-          }
+  </div>
 
+  <div class="actions">
 
-          ${
-            currentGame==="union"
-            &&
-            work
-            ? `
-              <span class="tag">
-                ${esc(work)}
-              </span>
-            `
-            : ""
-          }
+  ${
+    image
+    ?`
+    <button
+    class="btn"
+    onclick="
+    openPreview(
+    '${js(card.id)}'
+    )
+    ">
+    画像
+    </button>
+    `
+    :""
+  }
 
+  <button
+  class="btn primary"
+  onclick="
+  addCard(
+  '${js(card.id)}'
+  )
+  ">
+  ＋追加
+  ${qty ? `(${qty})` : ""}
+  </button>
 
-          ${
-            card.type
-            ? `
-              <span class="tag">
-                ${esc(card.type)}
-              </span>
-            `
-            : ""
-          }
+  ${
+    qty
+    ?`
+    <button
+    class="btn"
+    onclick="
+    removeCard(
+    '${js(card.id)}'
+    )
+    ">
+    −
+    </button>
+    `
+    :""
+  }
 
-        </div>
+  </div>
 
+  </div>
 
-        <div class="actions">
-
-          ${
-            image
-            ? `
-              <button
-                class="btn"
-                onclick="
-                  openPreview(
-                    '${js(card.id)}'
-                  )
-                ">
-                画像
-              </button>
-            `
-            : ""
-          }
-
-
-          <button
-            class="btn primary"
-            onclick="
-              addCard(
-                '${js(card.id)}'
-              )
-            ">
-            ＋追加
-            ${qty ? `(${qty})` : ""}
-          </button>
-
-
-          ${
-            qty
-            ? `
-              <button
-                class="btn"
-                onclick="
-                  removeCard(
-                    '${js(card.id)}'
-                  )
-                ">
-                −
-              </button>
-            `
-            : ""
-          }
-
-        </div>
-
-      </div>
-
-    </div>
+  </div>
 
   `;
 
@@ -2029,7 +1846,8 @@ function addCard(id){
     currentDeck();
 
   const now =
-    d.cards[id] || 0;
+    d.cards[id]
+    || 0;
 
   if(now >= 4){
 
@@ -2067,9 +1885,7 @@ function removeCard(id){
   if(
     d.cards[id] <= 0
   ){
-
     delete d.cards[id];
-
   }
 
   save();
@@ -2126,7 +1942,8 @@ function renderDeck(){
 
     entries.length
 
-    ? entries.map(
+    ? entries
+      .map(
         x=>{
 
           const card =
@@ -2135,71 +1952,71 @@ function renderDeck(){
           const image =
             imageOf(card);
 
-          return `
+          return`
 
-            <div class="deck-card">
+          <div class="deck-card">
 
-              <div
-                class="deck-img"
-                ${
-                  image
-                  ? `
-                    onclick="
-                      openPreview(
-                        '${js(card.id)}'
-                      )
-                    "
-                  `
-                  : ""
-                }>
+          <div
+          class="deck-img"
+          ${
+            image
+            ?`
+            onclick="
+            openPreview(
+            '${js(card.id)}'
+            )
+            "
+            `
+            :""
+          }>
 
-                ${
-                  image
-                  ? `
-                    <img
-                      src="${esc(image)}"
-                      loading="lazy">
-                  `
-                  : "画像なし"
-                }
+          ${
+            image
+            ?`
+            <img
+            src="${esc(image)}"
+            loading="lazy">
+            `
+            :"画像なし"
+          }
 
-                <span class="qty">
-                  ×${x.qty}
-                </span>
+          <span class="qty">
+          ×${x.qty}
+          </span>
 
-              </div>
+          </div>
 
-              <div class="deck-name">
-                ${esc(card.name)}
-              </div>
+          <div class="deck-name">
+          ${esc(card.name)}
+          </div>
 
-              <div class="deck-controls">
+          <div class="deck-controls">
 
-                <button
-                  onclick="
-                    removeCard(
-                      '${js(card.id)}'
-                    )
-                  ">
-                  −
-                </button>
+          <button
+          onclick="
+          removeCard(
+          '${js(card.id)}'
+          )
+          ">
+          −
+          </button>
 
-                <b>
-                  ${x.qty}
-                </b>
+          <b>
+          ${x.qty}
+          </b>
 
-                <button
-                  onclick="
-                    addCard(
-                      '${js(card.id)}'
-                    )
-                  ">
-                  ＋
-                </button>
+          <button
+          onclick="
+          addCard(
+          '${js(card.id)}'
+          )
+          ">
+          ＋
+          </button>
 
-              </div>
+          </div>
 
-            </div>
+          </div>
 
           `;
 
@@ -2207,14 +2024,13 @@ function renderDeck(){
       )
       .join("")
 
-    : `
+    :`
       <div
-        class="panel"
-        style="grid-column:1/-1">
-        デッキにカードがありません
+      class="panel"
+      style="grid-column:1/-1">
+      デッキにカードがありません
       </div>
     `;
-
 
   updateStats();
 
@@ -2239,7 +2055,6 @@ function openPreview(id){
     return;
   }
 
-
   const image =
     imageOf(card);
 
@@ -2252,7 +2067,6 @@ function openPreview(id){
     return;
 
   }
-
 
   document.getElementById(
     "previewImage"
@@ -2271,8 +2085,7 @@ function openPreview(id){
 
   document.getElementById(
     "preview"
-  ).classList
-  .add("show");
+  ).classList.add("show");
 
 }
 
@@ -2281,8 +2094,7 @@ function closePreview(){
 
   document.getElementById(
     "preview"
-  ).classList
-  .remove("show");
+  ).classList.remove("show");
 
   document.getElementById(
     "previewImage"
@@ -2294,11 +2106,10 @@ function closePreview(){
 function closePreviewBg(e){
 
   if(
-    e.target.id==="preview"
+    e.target.id ===
+    "preview"
   ){
-
     closePreview();
-
   }
 
 }
@@ -2315,7 +2126,6 @@ function updateStats(){
       0
     );
 
-
   document.getElementById(
     "homeCards"
   ).textContent =
@@ -2324,20 +2134,17 @@ function updateStats(){
       || []
     ).length;
 
-
   document.getElementById(
     "homeDeck"
   ).textContent =
     total;
 
-
   document.getElementById(
     "homeSlots"
   ).textContent =
     state[currentGame]
-      .slots.length
+    .slots.length
     + "/5";
-
 
   document.getElementById(
     "topCardCount"
@@ -2349,12 +2156,10 @@ function updateStats(){
       0
     );
 
-
   document.getElementById(
     "topDeckCount"
   ).textContent =
     total;
-
 
   document.getElementById(
     "deckBadge"
@@ -2393,10 +2198,11 @@ function exportDeck(){
     + d.name
     + "\n\n";
 
-
   for(
     const [id,qty]
-    of Object.entries(d.cards)
+    of Object.entries(
+      d.cards
+    )
   ){
 
     const card =
@@ -2421,7 +2227,6 @@ function exportDeck(){
 
   }
 
-
   document.getElementById(
     "deckText"
   ).value =
@@ -2440,7 +2245,6 @@ function copyDeck(){
     );
 
   t.focus();
-
   t.select();
 
   try{
@@ -2490,7 +2294,6 @@ function renderSlots(){
   const s =
     state[currentGame];
 
-
   document.getElementById(
     "slotList"
   ).innerHTML =
@@ -2499,34 +2302,34 @@ function renderSlots(){
     .map(
       (slot,i)=>`
 
-        <div class="slot-row">
+      <div class="slot-row">
 
-          <b>
-            ${esc(slot.name)}
-          </b>
+      <b>
+      ${esc(slot.name)}
+      </b>
 
-          <button
-            class="
-              btn
-              ${
-                i===s.active
-                ? "primary"
-                : ""
-              }
-            "
-            onclick="
-              openSlot(${i})
-            ">
+      <button
+      class="
+      btn
+      ${
+        i===s.active
+        ?"primary"
+        :""
+      }
+      "
+      onclick="
+      openSlot(${i})
+      ">
 
-            ${
-              i===s.active
-              ? "編集中"
-              : "開く"
-            }
+      ${
+        i===s.active
+        ?"編集中"
+        :"開く"
+      }
 
-          </button>
+      </button>
 
-        </div>
+      </div>
 
       `
     )
@@ -2552,7 +2355,6 @@ function newSlot(){
 
   }
 
-
   s.slots.push({
 
     name:
@@ -2565,7 +2367,6 @@ function newSlot(){
     cards:{}
 
   });
-
 
   s.active =
     s.slots.length - 1;
@@ -2582,7 +2383,7 @@ function newSlot(){
 function openSlot(i){
 
   state[currentGame]
-    .active =
+  .active =
     i;
 
   save();
@@ -2596,7 +2397,8 @@ function openSlot(i){
 
 function refreshDB(){
 
-  db = bundled();
+  db =
+    bundled();
 
   localStorage.setItem(
     "tdsDataVersion",
@@ -2628,7 +2430,6 @@ function showView(view){
     "settings"
   ];
 
-
   pages.forEach(
     x=>{
 
@@ -2639,7 +2440,8 @@ function showView(view){
 
       if(section){
 
-        section.classList
+        section
+        .classList
         .toggle(
           "hidden",
           x!==view
@@ -2647,12 +2449,11 @@ function showView(view){
 
       }
 
-
       const nav =
         document.getElementById(
           "nav"
           + x[0]
-            .toUpperCase()
+          .toUpperCase()
           + x.slice(1)
         );
 
@@ -2669,14 +2470,10 @@ function showView(view){
     }
   );
 
-
-  window.scrollTo(
-    {
-      top:0,
-      behavior:"smooth"
-    }
-  );
-
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 
   if(view==="search"){
 
@@ -2686,20 +2483,13 @@ function showView(view){
 
   }
 
-
   if(view==="deck"){
-
     renderDeck();
-
   }
-
 
   if(view==="saved"){
-
     renderSlots();
-
   }
-
 
   if(view==="settings"){
 
@@ -2715,7 +2505,6 @@ function showView(view){
       + db.union.length
       + "件";
 
-
     document.getElementById(
       "themeSelect"
     ).value =
@@ -2729,6 +2518,888 @@ function showView(view){
 
 }
 
+
+/* =====================================
+   デッキ画像
+===================================== */
+
+let generatedDeckBlob =
+  null;
+
+
+async function createDeckImage(){
+
+  const d =
+    currentDeck();
+
+  const database =
+    db[currentGame] || [];
+
+  const entries =
+    Object.entries(
+      d.cards
+    )
+    .map(
+      ([id,qty])=>{
+
+        const card =
+          database.find(
+            x=>
+              String(x.id)
+              ===
+              String(id)
+          );
+
+        return{
+          card,
+          qty
+        };
+
+      }
+    )
+    .filter(
+      x=>x.card
+    );
+
+
+  if(
+    !entries.length
+  ){
+
+    alert(
+      "デッキにカードがありません"
+    );
+
+    return;
+
+  }
+
+
+  const canvas =
+    document.createElement(
+      "canvas"
+    );
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  const WIDTH =
+    1080;
+
+  const COLS =
+    5;
+
+  const GAP =
+    18;
+
+  const SIDE =
+    35;
+
+  const HEADER =
+    170;
+
+  const FOOTER =
+    90;
+
+  const CARD_W =
+    Math.floor(
+      (
+        WIDTH
+        -
+        SIDE*2
+        -
+        GAP*(COLS-1)
+      )
+      /
+      COLS
+    );
+
+  const CARD_H =
+    Math.round(
+      CARD_W * 1.4
+    );
+
+  const NAME_H =
+    58;
+
+  const CELL_H =
+    CARD_H
+    +
+    NAME_H
+    +
+    GAP;
+
+  const rows =
+    Math.ceil(
+      entries.length
+      /
+      COLS
+    );
+
+  const HEIGHT =
+    HEADER
+    +
+    rows*CELL_H
+    +
+    FOOTER;
+
+
+  canvas.width =
+    WIDTH;
+
+  canvas.height =
+    HEIGHT;
+
+
+  ctx.fillStyle =
+    "#11141b";
+
+  ctx.fillRect(
+    0,
+    0,
+    WIDTH,
+    HEIGHT
+  );
+
+
+  ctx.fillStyle =
+    GAME[currentGame]
+    .accent;
+
+  ctx.fillRect(
+    0,
+    0,
+    WIDTH,
+    14
+  );
+
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 46px sans-serif";
+
+  ctx.fillText(
+    d.name
+    ||
+    GAME[currentGame].name
+    +"デッキ",
+    SIDE,
+    70
+  );
+
+
+  ctx.fillStyle =
+    "#b9bec8";
+
+  ctx.font =
+    "26px sans-serif";
+
+  ctx.fillText(
+    "TCG Deck Studio / "
+    +
+    GAME[currentGame].name,
+    SIDE,
+    112
+  );
+
+
+  const total =
+    entries.reduce(
+      (sum,x)=>
+        sum+x.qty,
+      0
+    );
+
+
+  ctx.textAlign =
+    "right";
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "bold 32px sans-serif";
+
+  ctx.fillText(
+    total+"枚",
+    WIDTH-SIDE,
+    75
+  );
+
+  ctx.textAlign =
+    "left";
+
+
+  for(
+    let i=0;
+    i<entries.length;
+    i++
+  ){
+
+    const item =
+      entries[i];
+
+    const card =
+      item.card;
+
+    const col =
+      i % COLS;
+
+    const row =
+      Math.floor(
+        i / COLS
+      );
+
+
+    const x =
+      SIDE
+      +
+      col
+      *
+      (
+        CARD_W
+        +
+        GAP
+      );
+
+    const y =
+      HEADER
+      +
+      row
+      *
+      CELL_H;
+
+
+    ctx.fillStyle =
+      "#292e38";
+
+    canvasRoundRect(
+      ctx,
+      x,
+      y,
+      CARD_W,
+      CARD_H,
+      13
+    );
+
+    ctx.fill();
+
+
+    const imageUrl =
+      imageOf(card);
+
+    let drawn =
+      false;
+
+
+    if(imageUrl){
+
+      try{
+
+        const img =
+          await loadImageForDeckCanvas(
+            imageUrl
+          );
+
+        ctx.save();
+
+        canvasRoundRect(
+          ctx,
+          x,
+          y,
+          CARD_W,
+          CARD_H,
+          13
+        );
+
+        ctx.clip();
+
+        ctx.drawImage(
+          img,
+          x,
+          y,
+          CARD_W,
+          CARD_H
+        );
+
+        ctx.restore();
+
+        drawn =
+          true;
+
+      }catch(e){
+
+        drawn =
+          false;
+
+      }
+
+    }
+
+
+    if(!drawn){
+
+      ctx.fillStyle =
+        "#383e49";
+
+      canvasRoundRect(
+        ctx,
+        x,
+        y,
+        CARD_W,
+        CARD_H,
+        13
+      );
+
+      ctx.fill();
+
+      ctx.fillStyle =
+        "#ffffff";
+
+      ctx.textAlign =
+        "center";
+
+      ctx.font =
+        "bold 22px sans-serif";
+
+      wrapCanvasText(
+        ctx,
+        card.name,
+        x + CARD_W/2,
+        y + CARD_H/2,
+        CARD_W-24,
+        28,
+        4
+      );
+
+      ctx.textAlign =
+        "left";
+
+    }
+
+
+    ctx.fillStyle =
+      "#000000cc";
+
+    canvasRoundRect(
+      ctx,
+      x+CARD_W-62,
+      y+CARD_H-48,
+      55,
+      40,
+      20
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle =
+      "#ffffff";
+
+    ctx.font =
+      "bold 25px sans-serif";
+
+    ctx.textAlign =
+      "center";
+
+    ctx.fillText(
+      "×"+item.qty,
+      x+CARD_W-34,
+      y+CARD_H-20
+    );
+
+    ctx.textAlign =
+      "left";
+
+
+    ctx.fillStyle =
+      "#ffffff";
+
+    ctx.font =
+      "bold 18px sans-serif";
+
+    wrapCanvasText(
+      ctx,
+      card.name,
+      x,
+      y+CARD_H+22,
+      CARD_W,
+      21,
+      2
+    );
+
+  }
+
+
+  ctx.fillStyle =
+    "#aeb4bf";
+
+  ctx.font =
+    "22px sans-serif";
+
+  ctx.fillText(
+    "TCG Deck Studio",
+    SIDE,
+    HEIGHT-32
+  );
+
+
+  generatedDeckBlob =
+    await new Promise(
+      resolve=>
+        canvas.toBlob(
+          resolve,
+          "image/png",
+          0.95
+        )
+    );
+
+
+  if(
+    !generatedDeckBlob
+  ){
+
+    alert(
+      "デッキ画像を生成できませんでした"
+    );
+
+    return;
+
+  }
+
+
+  const url =
+    URL.createObjectURL(
+      generatedDeckBlob
+    );
+
+
+  document.getElementById(
+    "deckGeneratedImage"
+  ).src =
+    url;
+
+
+  document.getElementById(
+    "deckImagePreview"
+  ).classList.add(
+    "show"
+  );
+
+}
+
+
+async function loadImageForDeckCanvas(
+  url
+){
+
+  const response =
+    await fetch(
+      url,
+      {
+        mode:"cors",
+        cache:"force-cache"
+      }
+    );
+
+
+  if(
+    !response.ok
+  ){
+
+    throw new Error(
+      "image error"
+    );
+
+  }
+
+
+  const blob =
+    await response.blob();
+
+
+  const objectUrl =
+    URL.createObjectURL(
+      blob
+    );
+
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const img =
+        new Image();
+
+
+      img.onload =
+        ()=>{
+
+          URL.revokeObjectURL(
+            objectUrl
+          );
+
+          resolve(img);
+
+        };
+
+
+      img.onerror =
+        ()=>{
+
+          URL.revokeObjectURL(
+            objectUrl
+          );
+
+          reject(
+            new Error(
+              "load error"
+            )
+          );
+
+        };
+
+
+      img.src =
+        objectUrl;
+
+    }
+  );
+
+}
+
+
+function canvasRoundRect(
+  ctx,
+  x,
+  y,
+  w,
+  h,
+  r
+){
+
+  const radius =
+    Math.min(
+      r,
+      w/2,
+      h/2
+    );
+
+  ctx.beginPath();
+
+  ctx.moveTo(
+    x+radius,
+    y
+  );
+
+  ctx.arcTo(
+    x+w,
+    y,
+    x+w,
+    y+h,
+    radius
+  );
+
+  ctx.arcTo(
+    x+w,
+    y+h,
+    x,
+    y+h,
+    radius
+  );
+
+  ctx.arcTo(
+    x,
+    y+h,
+    x,
+    y,
+    radius
+  );
+
+  ctx.arcTo(
+    x,
+    y,
+    x+w,
+    y,
+    radius
+  );
+
+  ctx.closePath();
+
+}
+
+
+function wrapCanvasText(
+  ctx,
+  text,
+  x,
+  y,
+  maxWidth,
+  lineHeight,
+  maxLines=2
+){
+
+  const chars =
+    Array.from(
+      String(text || "")
+    );
+
+  let line =
+    "";
+
+  let lines =
+    [];
+
+
+  for(
+    const char
+    of chars
+  ){
+
+    const test =
+      line + char;
+
+
+    if(
+      ctx
+      .measureText(test)
+      .width
+      >
+      maxWidth
+      &&
+      line
+    ){
+
+      lines.push(line);
+
+      line =
+        char;
+
+      if(
+        lines.length
+        >=
+        maxLines
+      ){
+        break;
+      }
+
+    }
+
+    else{
+
+      line =
+        test;
+
+    }
+
+  }
+
+
+  if(
+    lines.length
+    <
+    maxLines
+    &&
+    line
+  ){
+
+    lines.push(line);
+
+  }
+
+
+  lines =
+    lines.slice(
+      0,
+      maxLines
+    );
+
+
+  lines.forEach(
+    (line,index)=>{
+
+      ctx.fillText(
+        line,
+        x,
+        y
+        +
+        index
+        *
+        lineHeight
+      );
+
+    }
+  );
+
+}
+
+
+function closeDeckImagePreview(){
+
+  document.getElementById(
+    "deckImagePreview"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+function saveDeckImage(){
+
+  if(
+    !generatedDeckBlob
+  ){
+
+    alert(
+      "先にデッキ画像を作成してください"
+    );
+
+    return;
+
+  }
+
+
+  const url =
+    URL.createObjectURL(
+      generatedDeckBlob
+    );
+
+
+  const a =
+    document.createElement(
+      "a"
+    );
+
+
+  const name =
+    (
+      currentDeck().name
+      ||
+      "deck"
+    )
+    .replace(
+      /[\\/:*?"<>|]/g,
+      "_"
+    );
+
+
+  a.href =
+    url;
+
+  a.download =
+    name+".png";
+
+
+  document.body
+  .appendChild(a);
+
+  a.click();
+
+  a.remove();
+
+
+  setTimeout(
+    ()=>
+      URL.revokeObjectURL(
+        url
+      ),
+    3000
+  );
+
+}
+
+
+async function shareDeckImage(){
+
+  if(
+    !generatedDeckBlob
+  ){
+
+    alert(
+      "先にデッキ画像を作成してください"
+    );
+
+    return;
+
+  }
+
+
+  const name =
+    (
+      currentDeck().name
+      ||
+      "deck"
+    )
+    .replace(
+      /[\\/:*?"<>|]/g,
+      "_"
+    );
+
+
+  const file =
+    new File(
+      [generatedDeckBlob],
+      name+".png",
+      {
+        type:"image/png"
+      }
+    );
+
+
+  try{
+
+    if(
+      navigator.canShare
+      &&
+      navigator.canShare(
+        {
+          files:[file]
+        }
+      )
+    ){
+
+      await navigator.share(
+        {
+          title:
+            currentDeck().name,
+
+          text:
+            "TCG Deck Studio",
+
+          files:[
+            file
+          ]
+        }
+      );
+
+    }
+
+    else{
+
+      saveDeckImage();
+
+    }
+
+  }catch(e){
+
+    if(
+      e.name !==
+      "AbortError"
+    ){
+
+      saveDeckImage();
+
+    }
+
+  }
+
+}
+
+
+/* ===== テーマ ===== */
 
 function applyTheme(mode){
 
@@ -2750,12 +3421,12 @@ function applyTheme(mode){
 
 
   document.documentElement
-    .setAttribute(
-      "data-theme",
-      dark
-      ? "dark"
-      : "light"
-    );
+  .setAttribute(
+    "data-theme",
+    dark
+    ?"dark"
+    :"light"
+  );
 
 }
 
@@ -2781,16 +3452,17 @@ applyTheme(
 
 
 document.documentElement
-  .style
-  .setProperty(
-    "--accent",
-    GAME[currentGame].accent
-  );
+.style
+.setProperty(
+  "--accent",
+  GAME[currentGame].accent
+);
 
 
 chooseGame(
   currentGame
 );
+
 
 showView(
   "home"
