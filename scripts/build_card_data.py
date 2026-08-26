@@ -3,23 +3,31 @@
 import gzip
 import json
 import re
-import urllib.parse
 import urllib.request
 from pathlib import Path
 
 
+# =========================================================
+# 基本設定
+# =========================================================
+
 ASSETS = Path("src/main/assets")
 ASSETS.mkdir(parents=True, exist_ok=True)
 
-USER_AGENT = "TCG-Deck-Studio-Builder/5.0"
+USER_AGENT = "TCG-Deck-Studio-Builder/6.0"
+
+UNION_JA_MAP_FILE = Path(
+    "scripts/union_ja_names.json"
+)
 
 
 # =========================================================
-# 共通
+# 共通関数
 # =========================================================
 
 def download(url, timeout=120):
-    req = urllib.request.Request(
+
+    request = urllib.request.Request(
         url,
         headers={
             "User-Agent": USER_AGENT,
@@ -29,7 +37,7 @@ def download(url, timeout=120):
     )
 
     with urllib.request.urlopen(
-        req,
+        request,
         timeout=timeout
     ) as response:
 
@@ -53,7 +61,10 @@ def safe(value):
     if value is None:
         return ""
 
-    if isinstance(value, (list, tuple)):
+    if isinstance(
+        value,
+        (list, tuple)
+    ):
 
         return " / ".join(
             str(x)
@@ -61,13 +72,19 @@ def safe(value):
             if x is not None
         )
 
-    if isinstance(value, dict):
+    if isinstance(
+        value,
+        dict
+    ):
         return ""
 
     return str(value)
 
 
-def first_value(obj, keys):
+def first_value(
+    obj,
+    keys
+):
 
     for key in keys:
 
@@ -76,7 +93,9 @@ def first_value(obj, keys):
         if value is None:
             continue
 
-        text = safe(value).strip()
+        text = safe(
+            value
+        ).strip()
 
         if text:
             return text
@@ -84,7 +103,9 @@ def first_value(obj, keys):
     return ""
 
 
-def contains_japanese(text):
+def contains_japanese(
+    text
+):
 
     return bool(
         re.search(
@@ -94,7 +115,23 @@ def contains_japanese(text):
     )
 
 
-def write_js(game, cards):
+def normalize(
+    text
+):
+
+    return re.sub(
+        r"\s+",
+        "",
+        safe(text)
+        .strip()
+        .lower()
+    )
+
+
+def write_js(
+    game,
+    cards
+):
 
     unique = {}
 
@@ -108,7 +145,10 @@ def write_js(game, cards):
             card.get("name")
         ).strip()
 
-        if not cid or not name:
+        if not cid:
+            continue
+
+        if not name:
             continue
 
         card["id"] = cid
@@ -116,55 +156,171 @@ def write_js(game, cards):
 
         unique[cid] = card
 
-    out = list(
+
+    output_cards = list(
         unique.values()
     )
 
+
+    if not output_cards:
+
+        raise RuntimeError(
+            f"{game}: card count is 0"
+        )
+
+
     payload = json.dumps(
-        out,
+        output_cards,
         ensure_ascii=False,
         separators=(",", ":")
     )
 
-    path = (
+
+    output_path = (
         ASSETS
-        / f"cards_{game}.js"
+        /
+        f"cards_{game}.js"
     )
 
-    path.write_text(
+
+    output_path.write_text(
+
         "window.TCG_CARD_DATA="
         "window.TCG_CARD_DATA||{};\n"
+
         f"window.TCG_CARD_DATA.{game}="
         f"{payload};\n",
+
         encoding="utf-8"
+
     )
+
 
     image_count = sum(
         1
-        for c in out
-        if c.get("image")
+        for card
+        in output_cards
+        if safe(
+            card.get("image")
+        ).strip()
     )
+
 
     japanese_count = sum(
         1
-        for c in out
+        for card
+        in output_cards
         if contains_japanese(
-            c.get("name", "")
+            card.get("name", "")
         )
     )
 
+
     print(
         f"{game}: "
-        f"{len(out)} cards / "
+        f"{len(output_cards)} cards / "
         f"{image_count} images / "
         f"{japanese_count} Japanese names"
     )
 
+
     return {
-        "cards": len(out),
-        "images": image_count,
-        "japanese_names": japanese_count,
+
+        "cards":
+            len(output_cards),
+
+        "images":
+            image_count,
+
+        "japanese_names":
+            japanese_count,
+
     }
+
+
+# =========================================================
+# ユニアリ 日本語名対応表
+# =========================================================
+
+def load_union_ja_map():
+
+    if not UNION_JA_MAP_FILE.exists():
+
+        print(
+            "Union Japanese map: "
+            "file not found"
+        )
+
+        return {}
+
+
+    try:
+
+        data = json.loads(
+            UNION_JA_MAP_FILE
+            .read_text(
+                encoding="utf-8"
+            )
+        )
+
+
+        if not isinstance(
+            data,
+            dict
+        ):
+
+            print(
+                "Union Japanese map: "
+                "invalid JSON format"
+            )
+
+            return {}
+
+
+        result = {}
+
+
+        for key, value in (
+            data.items()
+        ):
+
+            card_id = str(
+                key
+            ).strip()
+
+            japanese_name = str(
+                value
+            ).strip()
+
+
+            if (
+                card_id
+                and
+                japanese_name
+            ):
+
+                result[
+                    card_id
+                ] = japanese_name
+
+
+        print(
+            "Union Japanese name map:",
+            len(result)
+        )
+
+
+        return result
+
+
+    except Exception as error:
+
+        print(
+            "Union Japanese map error:",
+            error
+        )
+
+        return {}
 
 
 # =========================================================
@@ -176,7 +332,9 @@ LOVECA_COMMIT = (
 )
 
 
-def loveca_image_url(row):
+def loveca_image_url(
+    row
+):
 
     image = first_value(
         row,
@@ -188,52 +346,88 @@ def loveca_image_url(row):
         )
     )
 
+
     if not image:
         return ""
 
+
     if image.startswith(
-        ("https://", "http://")
+        (
+            "https://",
+            "http://"
+        )
     ):
         return image
 
-    image = image.lstrip("./")
+
+    image = image.lstrip(
+        "./"
+    )
+
 
     return (
+
         "https://raw.githubusercontent.com/"
         "wlt233/llocg_db/"
         f"{LOVECA_COMMIT}/"
         f"{image}"
+
     )
 
 
 def build_loveca():
 
     url = (
+
         "https://raw.githubusercontent.com/"
         "wlt233/llocg_db/"
         f"{LOVECA_COMMIT}/"
         "json/cards.json"
+
     )
 
-    data = get_json(url)
 
-    if isinstance(data, dict):
-        rows = list(data.values())
+    data = get_json(
+        url
+    )
 
-    elif isinstance(data, list):
+
+    if isinstance(
+        data,
+        dict
+    ):
+
+        rows = list(
+            data.values()
+        )
+
+    elif isinstance(
+        data,
+        list
+    ):
+
         rows = data
 
     else:
+
         raise RuntimeError(
             "LoveCa data invalid"
         )
 
+
     cards = []
 
-    for i, row in enumerate(rows):
 
-        if not isinstance(row, dict):
+    for index, row in enumerate(
+        rows
+    ):
+
+        if not isinstance(
+            row,
+            dict
+        ):
             continue
+
 
         cid = first_value(
             row,
@@ -244,8 +438,13 @@ def build_loveca():
             )
         )
 
+
         if not cid:
-            cid = f"LL-{i + 1}"
+
+            cid = (
+                f"LL-{index + 1}"
+            )
+
 
         name = first_value(
             row,
@@ -256,53 +455,76 @@ def build_loveca():
             )
         )
 
+
         if not name:
-            name = "カード " + cid
+
+            name = (
+                "カード "
+                + cid
+            )
+
 
         cards.append({
 
-            "id": cid,
+            "id":
+                cid,
 
-            "name": name,
+            "name":
+                name,
 
-            "type": first_value(
-                row,
-                (
-                    "type",
-                    "card_type",
-                )
-            ),
+            "type":
+                first_value(
+                    row,
+                    (
+                        "type",
+                        "card_type",
+                    )
+                ),
 
-            "series": first_value(
-                row,
-                (
-                    "series",
-                    "group",
-                    "title",
-                )
-            ),
+            "series":
+                first_value(
+                    row,
+                    (
+                        "series",
+                        "group",
+                        "title",
+                    )
+                ),
 
-            "product": first_value(
-                row,
-                (
-                    "product",
-                    "pack",
-                    "set",
-                )
-            ),
+            "product":
+                first_value(
+                    row,
+                    (
+                        "product",
+                        "pack",
+                        "set",
+                    )
+                ),
 
-            "rarity": first_value(
-                row,
-                (
-                    "rare",
-                    "rarity",
-                )
-            ),
+            "rarity":
+                first_value(
+                    row,
+                    (
+                        "rare",
+                        "rarity",
+                    )
+                ),
 
             "image":
-                loveca_image_url(row),
+                loveca_image_url(
+                    row
+                ),
 
         })
+
+
+    if len(cards) < 100:
+
+        raise RuntimeError(
+            "LoveCa data too small: "
+            + str(len(cards))
+        )
+
 
     return cards
 
@@ -311,46 +533,54 @@ def build_loveca():
 # ポケカ
 # =========================================================
 
-def normalize(text):
-
-    return re.sub(
-        r"\s+",
-        "",
-        safe(text)
-        .strip()
-        .lower()
-    )
-
-
 def load_tcgdex_sets():
 
     sets = get_json(
-        "https://api.tcgdex.net/v2/ja/sets"
+        "https://api.tcgdex.net/"
+        "v2/ja/sets"
     )
+
 
     result = {}
 
-    if not isinstance(sets, list):
+
+    if not isinstance(
+        sets,
+        list
+    ):
+
         return result
 
-    for index, item in enumerate(sets):
 
-        if not isinstance(item, dict):
+    for index, item in enumerate(
+        sets
+    ):
+
+        if not isinstance(
+            item,
+            dict
+        ):
             continue
+
 
         set_id = safe(
             item.get("id")
         ).strip()
 
+
         if not set_id:
             continue
+
 
         try:
 
             detail = get_json(
+
                 "https://api.tcgdex.net/"
                 f"v2/ja/sets/{set_id}"
+
             )
+
 
         except Exception as error:
 
@@ -362,70 +592,117 @@ def load_tcgdex_sets():
 
             continue
 
+
+        if not isinstance(
+            detail,
+            dict
+        ):
+            continue
+
+
         set_name = safe(
             detail.get("name")
         ).strip()
+
 
         cards = detail.get(
             "cards",
             []
         )
 
-        if not isinstance(cards, list):
+
+        if not isinstance(
+            cards,
+            list
+        ):
             continue
+
 
         for card in cards:
 
-            if not isinstance(card, dict):
+            if not isinstance(
+                card,
+                dict
+            ):
                 continue
 
-            name = safe(
+
+            card_name = safe(
                 card.get("name")
             ).strip()
 
-            image = safe(
+
+            image_base = safe(
                 card.get("image")
             ).strip()
 
-            if not name:
+
+            if not card_name:
                 continue
+
 
             image_url = ""
 
-            if image:
+
+            if image_base:
+
                 image_url = (
-                    image.rstrip("/")
-                    + "/low.webp"
+                    image_base
+                    .rstrip("/")
+                    +
+                    "/low.webp"
                 )
+
 
             result[
                 (
-                    normalize(name),
-                    normalize(set_name),
+                    normalize(
+                        card_name
+                    ),
+                    normalize(
+                        set_name
+                    ),
                 )
             ] = image_url
 
+
             result.setdefault(
+
                 (
-                    normalize(name),
+                    normalize(
+                        card_name
+                    ),
                     "",
                 ),
+
                 image_url
+
             )
 
-        if index % 30 == 0:
+
+        if (
+            index > 0
+            and
+            index % 30 == 0
+        ):
 
             print(
                 "Pokemon sets:",
                 index
             )
 
+
     return result
 
 
-def pokemon_type(raw):
+def pokemon_type(
+    raw
+):
 
-    text = safe(raw).strip()
+    text = safe(
+        raw
+    ).strip()
+
 
     mapping = {
 
@@ -443,6 +720,7 @@ def pokemon_type(raw):
 
     }
 
+
     return mapping.get(
         text,
         text or "カード"
@@ -452,33 +730,68 @@ def pokemon_type(raw):
 def build_pokemon():
 
     source = get_json(
+
         "https://raw.githubusercontent.com/"
         "1ulce/pokemon-card-data/"
         "main/index/all.json"
+
     )
 
-    rows = (
-        source.get("faces", [])
-        if isinstance(source, dict)
-        else source
-    )
 
-    if not isinstance(rows, list):
+    if isinstance(
+        source,
+        dict
+    ):
+
+        rows = source.get(
+            "faces",
+            []
+        )
+
+    else:
+
+        rows = source
+
+
+    if not isinstance(
+        rows,
+        list
+    ):
 
         raise RuntimeError(
             "Pokemon data invalid"
         )
 
+
+    print(
+        "Loading Pokemon image map..."
+    )
+
+
     image_map = (
         load_tcgdex_sets()
     )
 
+
+    print(
+        "Pokemon image map:",
+        len(image_map)
+    )
+
+
     cards = []
 
-    for i, row in enumerate(rows):
 
-        if not isinstance(row, dict):
+    for index, row in enumerate(
+        rows
+    ):
+
+        if not isinstance(
+            row,
+            dict
+        ):
             continue
+
 
         cid = first_value(
             row,
@@ -488,8 +801,13 @@ def build_pokemon():
             )
         )
 
+
         if not cid:
-            cid = f"PK-{i + 1}"
+
+            cid = (
+                f"PK-{index + 1}"
+            )
+
 
         name = first_value(
             row,
@@ -500,7 +818,13 @@ def build_pokemon():
             )
         )
 
-        title = first_value(
+
+        if not name:
+
+            name = cid
+
+
+        sale_title = first_value(
             row,
             (
                 "first_set",
@@ -508,6 +832,7 @@ def build_pokemon():
                 "set",
             )
         )
+
 
         regulation = first_value(
             row,
@@ -517,43 +842,69 @@ def build_pokemon():
             )
         )
 
+
         image = image_map.get(
+
             (
-                normalize(name),
-                normalize(title),
+                normalize(
+                    name
+                ),
+                normalize(
+                    sale_title
+                ),
             ),
+
             ""
+
         )
+
 
         if not image:
 
             image = image_map.get(
+
                 (
-                    normalize(name),
+                    normalize(
+                        name
+                    ),
                     "",
                 ),
+
                 ""
+
             )
+
 
         cards.append({
 
-            "id": cid,
+            "id":
+                cid,
 
-            "name": name,
+            "name":
+                name,
+
+            "name_en":
+                safe(
+                    row.get(
+                        "name_en"
+                    )
+                ).strip(),
 
             "type":
                 pokemon_type(
-                    row.get("card_type")
+                    row.get(
+                        "card_type"
+                    )
                 ),
 
             "saleTitle":
-                title,
+                sale_title,
 
             "series":
-                title,
+                sale_title,
 
             "product":
-                title,
+                sale_title,
 
             "regulation":
                 regulation,
@@ -561,18 +912,28 @@ def build_pokemon():
             "regulationMark":
                 regulation,
 
-            "rarity": first_value(
-                row,
-                (
-                    "rarity",
-                    "first_rarity",
-                )
-            ),
+            "rarity":
+                first_value(
+                    row,
+                    (
+                        "rarity",
+                        "first_rarity",
+                    )
+                ),
 
             "image":
                 image,
 
         })
+
+
+    if len(cards) < 500:
+
+        raise RuntimeError(
+            "Pokemon data too small: "
+            + str(len(cards))
+        )
+
 
     return cards
 
@@ -652,20 +1013,11 @@ UNION_TITLE_JA = {
     "GODDESS OF VICTORY":
         "勝利の女神：NIKKE",
 
-    "WIND BREAKER":
-        "WIND BREAKER",
-
     "MADOKA MAGICA":
         "魔法少女まどか☆マギカ",
 
     "MADOKA":
         "魔法少女まどか☆マギカ",
-
-    "SAKAMOTO DAYS":
-        "SAKAMOTO DAYS",
-
-    "D.GRAY-MAN":
-        "D.Gray-man",
 
     "TOKYO GHOUL":
         "東京喰種",
@@ -675,9 +1027,6 @@ UNION_TITLE_JA = {
 
     "GURREN LAGANN":
         "天元突破グレンラガン",
-
-    "STEINS;GATE":
-        "STEINS;GATE",
 
 }
 
@@ -757,7 +1106,11 @@ def recursive_union(
     if output is None:
         output = []
 
-    if isinstance(obj, list):
+
+    if isinstance(
+        obj,
+        list
+    ):
 
         for item in obj:
 
@@ -771,7 +1124,11 @@ def recursive_union(
         return output
 
 
-    if not isinstance(obj, dict):
+    if not isinstance(
+        obj,
+        dict
+    ):
+
         return output
 
 
@@ -796,6 +1153,7 @@ def recursive_union(
             "gameName",
             "game_name",
             "categoryName",
+            "category_name",
         )
     ) or work_name
 
@@ -806,13 +1164,17 @@ def recursive_union(
         "cards",
     ):
 
-        value = obj.get(key)
+        value = obj.get(
+            key
+        )
+
 
         if not isinstance(
             value,
             list
         ):
             continue
+
 
         for item in value:
 
@@ -822,7 +1184,11 @@ def recursive_union(
             ):
                 continue
 
-            row = dict(item)
+
+            row = dict(
+                item
+            )
+
 
             row["_set_name"] = (
                 local_set
@@ -832,10 +1198,15 @@ def recursive_union(
                 local_work
             )
 
-            output.append(row)
+
+            output.append(
+                row
+            )
 
 
-    for key, value in obj.items():
+    for key, value in (
+        obj.items()
+    ):
 
         if key in (
             "products",
@@ -844,9 +1215,13 @@ def recursive_union(
         ):
             continue
 
+
         if isinstance(
             value,
-            (list, dict)
+            (
+                list,
+                dict
+            )
         ):
 
             recursive_union(
@@ -855,6 +1230,7 @@ def recursive_union(
                 local_work,
                 output
             )
+
 
     return output
 
@@ -865,15 +1241,24 @@ def union_work_name(
 ):
 
     text = (
-        safe(work).strip()
+        safe(
+            work
+        ).strip()
         or
-        safe(product).strip()
+        safe(
+            product
+        ).strip()
     )
 
-    if contains_japanese(text):
+
+    if contains_japanese(
+        text
+    ):
         return text
 
+
     upper = text.upper()
+
 
     for key, value in (
         UNION_TITLE_JA.items()
@@ -882,13 +1267,14 @@ def union_work_name(
         if key in upper:
             return value
 
+
     return text
 
 
-def union_card_name(row):
+def union_card_name(
+    row
+):
 
-    # 元データに日本語名がある場合
-    # それを最優先
     japanese = first_value(
         row,
         (
@@ -897,10 +1283,12 @@ def union_card_name(row):
             "nameJA",
             "name_jp",
             "nameJp",
+            "nameJP",
             "japaneseName",
             "japanese_name",
         )
     )
+
 
     if japanese:
         return japanese
@@ -916,7 +1304,10 @@ def union_card_name(row):
         )
     )
 
-    if contains_japanese(original):
+
+    if contains_japanese(
+        original
+    ):
         return original
 
 
@@ -927,7 +1318,9 @@ def union_card_name(row):
     )
 
 
-    if upper in UNION_CHARACTER_JA:
+    if upper in (
+        UNION_CHARACTER_JA
+    ):
 
         return (
             UNION_CHARACTER_JA[
@@ -939,7 +1332,35 @@ def union_card_name(row):
     return original
 
 
-def union_image(row):
+def union_image(
+    row
+):
+
+    japanese_image = first_value(
+        row,
+        (
+            "imageJa",
+            "imageJA",
+            "image_ja",
+            "imageJp",
+            "imageJP",
+            "japaneseImage",
+            "japanese_image",
+            "imageUrlJa",
+            "imageUrlJP",
+        )
+    )
+
+
+    if japanese_image.startswith(
+        (
+            "https://",
+            "http://"
+        )
+    ):
+
+        return japanese_image
+
 
     direct = first_value(
         row,
@@ -951,9 +1372,14 @@ def union_image(row):
         )
     )
 
+
     if direct.startswith(
-        ("https://", "http://")
+        (
+            "https://",
+            "http://"
+        )
     ):
+
         return direct
 
 
@@ -969,23 +1395,28 @@ def union_image(row):
     if product_id.isdigit():
 
         return (
+
             "https://tcgplayer-cdn."
             "tcgplayer.com/product/"
             f"{product_id}"
             "_in_1000x1000.jpg"
+
         )
 
 
     return ""
 
 
-def union_type(raw):
+def union_type(
+    raw
+):
 
     text = (
         safe(raw)
         .strip()
         .lower()
     )
+
 
     mapping = {
 
@@ -1009,32 +1440,51 @@ def union_type(raw):
 
     }
 
+
     return mapping.get(
+
         text,
+
         safe(raw).strip()
         or "カード"
+
     )
 
 
 def build_union():
 
     data = get_json(
+
         "https://github.com/"
         "HanClinto/tcgjson/"
         "releases/latest/download/"
         "union-arena.json.gz",
+
         gz=True
+
     )
 
 
-    rows = recursive_union(data)
+    rows = recursive_union(
+        data
+    )
+
+
+    japanese_name_map = (
+        load_union_ja_map()
+    )
+
 
     cards = []
 
     seen = set()
 
+    mapped_count = 0
 
-    for index, row in enumerate(rows):
+
+    for index, row in enumerate(
+        rows
+    ):
 
         signature = json.dumps(
             row,
@@ -1043,10 +1493,14 @@ def build_union():
             default=str
         )
 
+
         if signature in seen:
             continue
 
-        seen.add(signature)
+
+        seen.add(
+            signature
+        )
 
 
         product_id = first_value(
@@ -1113,6 +1567,50 @@ def build_union():
         )
 
 
+        # =================================================
+        # union_ja_names.json の日本語名を最優先
+        # =================================================
+
+        mapped_name = (
+            japanese_name_map.get(
+                cid,
+                ""
+            )
+        )
+
+
+        if mapped_name:
+
+            name = mapped_name
+
+            mapped_count += 1
+
+
+        # カード番号の表記ゆれ対策
+        if not mapped_name:
+
+            normalized_id = (
+                cid
+                .replace(" ", "")
+                .strip()
+            )
+
+
+            mapped_name = (
+                japanese_name_map.get(
+                    normalized_id,
+                    ""
+                )
+            )
+
+
+            if mapped_name:
+
+                name = mapped_name
+
+                mapped_count += 1
+
+
         if not name:
             continue
 
@@ -1156,12 +1654,28 @@ def build_union():
                 ),
 
             "image":
-                union_image(row),
+                union_image(
+                    row
+                ),
 
             "productId":
                 product_id,
 
         })
+
+
+    print(
+        "Union mapped Japanese names:",
+        mapped_count
+    )
+
+
+    if len(cards) < 100:
+
+        raise RuntimeError(
+            "Union Arena data too small: "
+            + str(len(cards))
+        )
 
 
     return cards
@@ -1198,7 +1712,11 @@ def main():
             f"Building {game}..."
         )
 
-        cards = builder()
+
+        cards = (
+            builder()
+        )
+
 
         info[game] = write_js(
             game,
@@ -1206,14 +1724,18 @@ def main():
         )
 
 
-    (
+    info_path = (
         ASSETS
-        / "card_data_build_info.json"
-    ).write_text(
+        /
+        "card_data_build_info.json"
+    )
+
+
+    info_path.write_text(
 
         json.dumps(
             {
-                "version": 5,
+                "version": 6,
                 "data": info,
             },
             ensure_ascii=False,
@@ -1228,6 +1750,7 @@ def main():
     print(
         "Card data build complete"
     )
+
 
     print(
         json.dumps(
