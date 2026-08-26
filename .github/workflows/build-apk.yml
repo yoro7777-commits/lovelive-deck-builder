@@ -2,8 +2,16 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      refresh_union_japanese:
+        description: 'ユニアリ日本語名を更新する'
+        required: true
+        type: boolean
+        default: false
+
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
       - 'app/**'
       - 'src/**'
@@ -15,14 +23,29 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
+    timeout-minutes: 180
+
     permissions:
-      contents: read
+      contents: write
 
     steps:
+
+      # ==========================================
+      # リポジトリ取得
+      # ==========================================
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      # ==========================================
+      # Java
+      # ==========================================
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -30,19 +53,219 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+
+      # ==========================================
+      # ユニアリ日本語名更新
+      #
+      # ActionsのRun workflowから
+      # refresh_union_japanese = true
+      # にした場合だけ実行
+      # ==========================================
+
+      - name: Prepare current Union card database
+        if: >
+          github.event_name == 'workflow_dispatch' &&
+          inputs.refresh_union_japanese == true
+        run: |
+          echo "Preparing Union Arena card database..."
+          python3 scripts/build_card_data.py
+
+
+      - name: Build Union Arena Japanese names
+        if: >
+          github.event_name == 'workflow_dispatch' &&
+          inputs.refresh_union_japanese == true
+        run: |
+          echo "===================================="
+          echo "Union Arena Japanese name update"
+          echo "===================================="
+
+          python3 scripts/build_union_japanese.py
+
+          echo ""
+          echo "Japanese map generated."
+
+          if [ -f scripts/union_ja_names.json ]; then
+            echo "Map count:"
+            python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("scripts/union_ja_names.json")
+
+          data = json.loads(
+              path.read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          print(
+              len(data),
+              "Japanese names"
+          )
+          PY
+
+          else
+            echo "union_ja_names.json was not created."
+            exit 1
+          fi
+
+
+      # ==========================================
+      # 日本語名マップをGitHubに保存
+      # ==========================================
+
+      - name: Save Union Japanese map
+        if: >
+          github.event_name == 'workflow_dispatch' &&
+          inputs.refresh_union_japanese == true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add scripts/union_ja_names.json
+
+          if git diff --cached --quiet; then
+            echo "No Japanese map changes."
+          else
+            git commit -m "Update Union Arena Japanese names [skip ci]"
+            git push
+          fi
+
+
+      # ==========================================
+      # 最新カードDBを生成
+      #
+      # union_ja_names.json が存在すれば
+      # build_card_data.py が日本語名を適用
+      # ==========================================
+
       - name: Build bundled card database
-        run: python3 scripts/build_card_data.py
+        run: |
+          echo "===================================="
+          echo "Building card databases"
+          echo "===================================="
+
+          python3 scripts/build_card_data.py
+
+
+      # ==========================================
+      # カード件数確認
+      # ==========================================
 
       - name: Show card database counts
-        run: cat src/main/assets/card_data_build_info.json
+        run: |
+          echo "===================================="
+          echo "Card database information"
+          echo "===================================="
+
+          cat src/main/assets/card_data_build_info.json
+
+
+      # ==========================================
+      # ユニアリ日本語化件数を確認
+      # ==========================================
+
+      - name: Show Union Japanese name count
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          info_file = Path(
+              "src/main/assets/card_data_build_info.json"
+          )
+
+          if not info_file.exists():
+              print(
+                  "card_data_build_info.json not found"
+              )
+              raise SystemExit(0)
+
+          info = json.loads(
+              info_file.read_text(
+                  encoding="utf-8"
+              )
+          )
+
+          union = (
+              info
+              .get("data", {})
+              .get("union", {})
+          )
+
+          print(
+              "Union cards:",
+              union.get(
+                  "cards",
+                  0
+              )
+          )
+
+          print(
+              "Union images:",
+              union.get(
+                  "images",
+                  0
+              )
+          )
+
+          print(
+              "Union Japanese names:",
+              union.get(
+                  "japanese_names",
+                  0
+              )
+          )
+
+          map_file = Path(
+              "scripts/union_ja_names.json"
+          )
+
+          if map_file.exists():
+
+              mapping = json.loads(
+                  map_file.read_text(
+                      encoding="utf-8"
+                  )
+              )
+
+              print(
+                  "Union Japanese map:",
+                  len(mapping)
+              )
+
+          else:
+
+              print(
+                  "Union Japanese map: 0"
+              )
+
+          PY
+
+
+      # ==========================================
+      # Gradle
+      # ==========================================
 
       - name: Set up Gradle 8.9
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
+
+      # ==========================================
+      # APK作成
+      # ==========================================
+
       - name: Build debug APK
-        run: gradle :app:assembleDebug --stacktrace
+        run: |
+          gradle :app:assembleDebug --stacktrace
+
+
+      # ==========================================
+      # APKアップロード
+      # ==========================================
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -50,3 +273,20 @@ jobs:
           name: tcg-deck-studio-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 30
+
+
+      # ==========================================
+      # 日本語名マップも成果物として保存
+      # ==========================================
+
+      - name: Upload Union Japanese map
+        if: >
+          github.event_name == 'workflow_dispatch' &&
+          inputs.refresh_union_japanese == true
+        uses: actions/upload-artifact@v4
+        with:
+          name: union-arena-japanese-names
+          path: scripts/union_ja_names.json
+          if-no-files-found: warn
+          retention-days: 30
