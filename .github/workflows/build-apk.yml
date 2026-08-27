@@ -23,9 +23,7 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     timeout-minutes: 180
 
     permissions:
@@ -55,11 +53,7 @@ jobs:
 
 
       # ==========================================
-      # ユニアリ日本語名更新
-      #
-      # ActionsのRun workflowから
-      # refresh_union_japanese = true
-      # にした場合だけ実行
+      # 現在のカードDBを準備
       # ==========================================
 
       - name: Prepare current Union card database
@@ -71,51 +65,78 @@ jobs:
           python3 scripts/build_card_data.py
 
 
-      - name: Build Union Arena Japanese names
+      # ==========================================
+      # ユニアリ日本語化
+      # ==========================================
+
+      - name: Build Union Arena Japanese mappings
         if: >
           github.event_name == 'workflow_dispatch' &&
           inputs.refresh_union_japanese == true
         run: |
           echo "===================================="
-          echo "Union Arena Japanese name update"
+          echo "Union Arena Japanese update"
           echo "===================================="
 
           python3 scripts/build_union_japanese.py
 
           echo ""
-          echo "Japanese map generated."
+          echo "Japanese mapping process finished."
 
-          if [ -f scripts/union_ja_names.json ]; then
-            echo "Map count:"
-            python3 - <<'PY'
-          import json
-          from pathlib import Path
-
-          path = Path("scripts/union_ja_names.json")
-
-          data = json.loads(
-              path.read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          print(
-              len(data),
-              "Japanese names"
-          )
-          PY
-
-          else
-            echo "union_ja_names.json was not created."
+          if [ ! -f scripts/union_ja_names.json ]; then
+            echo "ERROR: union_ja_names.json was not created."
             exit 1
           fi
 
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = [
+              Path("scripts/union_ja_names.json"),
+              Path("scripts/union_ja_ids.json"),
+              Path("scripts/union_ja_set_map.json"),
+          ]
+
+          print("")
+          print("====================================")
+          print("Union Japanese mapping information")
+          print("====================================")
+
+          for path in files:
+
+              if not path.exists():
+                  print(path.name, ": not found")
+                  continue
+
+              try:
+                  data = json.loads(
+                      path.read_text(
+                          encoding="utf-8"
+                      )
+                  )
+
+                  print(
+                      path.name,
+                      ":",
+                      len(data)
+                  )
+
+              except Exception as error:
+
+                  print(
+                      path.name,
+                      ": ERROR:",
+                      error
+                  )
+          PY
+
 
       # ==========================================
-      # 日本語名マップをGitHubに保存
+      # 3種類の対応表をGitHubへ保存
       # ==========================================
 
-      - name: Save Union Japanese map
+      - name: Save Union Japanese mappings
         if: >
           github.event_name == 'workflow_dispatch' &&
           inputs.refresh_union_japanese == true
@@ -123,21 +144,43 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add scripts/union_ja_names.json
+          echo "Saving Union Arena Japanese mapping files..."
+
+          if [ -f scripts/union_ja_names.json ]; then
+            git add scripts/union_ja_names.json
+          fi
+
+          if [ -f scripts/union_ja_ids.json ]; then
+            git add scripts/union_ja_ids.json
+          fi
+
+          if [ -f scripts/union_ja_set_map.json ]; then
+            git add scripts/union_ja_set_map.json
+          fi
+
+          echo ""
+          echo "Files staged:"
+          git diff --cached --name-only
 
           if git diff --cached --quiet; then
-            echo "No Japanese map changes."
+
+            echo "No Union Japanese mapping changes."
+
           else
-            git commit -m "Update Union Arena Japanese names [skip ci]"
+
+            git commit \
+              -m "Update Union Arena Japanese mappings [skip ci]"
+
             git push
+
+            echo ""
+            echo "Union Japanese mappings saved."
+
           fi
 
 
       # ==========================================
-      # 最新カードDBを生成
-      #
-      # union_ja_names.json が存在すれば
-      # build_card_data.py が日本語名を適用
+      # 日本語名を適用してカードDB再生成
       # ==========================================
 
       - name: Build bundled card database
@@ -150,7 +193,7 @@ jobs:
 
 
       # ==========================================
-      # カード件数確認
+      # カードDB情報
       # ==========================================
 
       - name: Show card database counts
@@ -159,88 +202,137 @@ jobs:
           echo "Card database information"
           echo "===================================="
 
-          cat src/main/assets/card_data_build_info.json
+          if [ -f src/main/assets/card_data_build_info.json ]; then
+
+            cat src/main/assets/card_data_build_info.json
+
+          else
+
+            echo "card_data_build_info.json not found"
+            exit 1
+
+          fi
 
 
       # ==========================================
-      # ユニアリ日本語化件数を確認
+      # ユニアリ日本語化件数確認
       # ==========================================
 
-      - name: Show Union Japanese name count
+      - name: Show Union Japanese information
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
 
+          print("")
+          print("====================================")
+          print("Union Arena Japanese information")
+          print("====================================")
+
           info_file = Path(
               "src/main/assets/card_data_build_info.json"
           )
 
-          if not info_file.exists():
-              print(
-                  "card_data_build_info.json not found"
-              )
-              raise SystemExit(0)
+          if info_file.exists():
 
-          info = json.loads(
-              info_file.read_text(
-                  encoding="utf-8"
-              )
-          )
-
-          union = (
-              info
-              .get("data", {})
-              .get("union", {})
-          )
-
-          print(
-              "Union cards:",
-              union.get(
-                  "cards",
-                  0
-              )
-          )
-
-          print(
-              "Union images:",
-              union.get(
-                  "images",
-                  0
-              )
-          )
-
-          print(
-              "Union Japanese names:",
-              union.get(
-                  "japanese_names",
-                  0
-              )
-          )
-
-          map_file = Path(
-              "scripts/union_ja_names.json"
-          )
-
-          if map_file.exists():
-
-              mapping = json.loads(
-                  map_file.read_text(
+              info = json.loads(
+                  info_file.read_text(
                       encoding="utf-8"
                   )
               )
 
+              union = (
+                  info
+                  .get("data", {})
+                  .get("union", {})
+              )
+
               print(
-                  "Union Japanese map:",
-                  len(mapping)
+                  "Union cards:",
+                  union.get(
+                      "cards",
+                      0
+                  )
+              )
+
+              print(
+                  "Union images:",
+                  union.get(
+                      "images",
+                      0
+                  )
+              )
+
+              print(
+                  "Union Japanese names:",
+                  union.get(
+                      "japanese_names",
+                      0
+                  )
               )
 
           else:
 
               print(
-                  "Union Japanese map: 0"
+                  "card_data_build_info.json not found"
               )
 
+          print("")
+          print("Mapping files:")
+
+          mapping_files = [
+              (
+                  "Japanese names",
+                  Path(
+                      "scripts/union_ja_names.json"
+                  )
+              ),
+              (
+                  "Japanese IDs",
+                  Path(
+                      "scripts/union_ja_ids.json"
+                  )
+              ),
+              (
+                  "Set mappings",
+                  Path(
+                      "scripts/union_ja_set_map.json"
+                  )
+              ),
+          ]
+
+          for label, path in mapping_files:
+
+              if not path.exists():
+
+                  print(
+                      label,
+                      ": 0"
+                  )
+
+                  continue
+
+              try:
+
+                  data = json.loads(
+                      path.read_text(
+                          encoding="utf-8"
+                      )
+                  )
+
+                  print(
+                      label,
+                      ":",
+                      len(data)
+                  )
+
+              except Exception as error:
+
+                  print(
+                      label,
+                      ": ERROR:",
+                      error
+                  )
           PY
 
 
@@ -260,7 +352,30 @@ jobs:
 
       - name: Build debug APK
         run: |
+          echo "===================================="
+          echo "Building Android APK"
+          echo "===================================="
+
           gradle :app:assembleDebug --stacktrace
+
+
+      # ==========================================
+      # APK確認
+      # ==========================================
+
+      - name: Verify APK
+        run: |
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -f "$APK" ]; then
+
+            echo "ERROR: APK was not created."
+            exit 1
+
+          fi
+
+          echo "APK created successfully:"
+          ls -lh "$APK"
 
 
       # ==========================================
@@ -277,16 +392,19 @@ jobs:
 
 
       # ==========================================
-      # 日本語名マップも成果物として保存
+      # 日本語化データ3種類をまとめて保存
       # ==========================================
 
-      - name: Upload Union Japanese map
+      - name: Upload Union Japanese mappings
         if: >
           github.event_name == 'workflow_dispatch' &&
           inputs.refresh_union_japanese == true
         uses: actions/upload-artifact@v4
         with:
-          name: union-arena-japanese-names
-          path: scripts/union_ja_names.json
+          name: union-arena-japanese-maps
+          path: |
+            scripts/union_ja_names.json
+            scripts/union_ja_ids.json
+            scripts/union_ja_set_map.json
           if-no-files-found: warn
           retention-days: 30
